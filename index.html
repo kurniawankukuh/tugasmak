@@ -1,0 +1,879 @@
+<title>DSS Evaluasi Video Cetakgol IDN</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Liquid glass: latar mesh gradien berwarna, panel kaca buram dengan sorot specular, sidebar mengambang. */
+:root{
+  --bg0:#e8eefb; --b1:#79a6ff; --b2:#7fe0d2; --b3:#c4a3ff; --b4:#ffc7a1; --blob-o:.62;
+  --glass:rgba(255,255,255,.50); --glass-2:rgba(255,255,255,.68); --glass-in:rgba(255,255,255,.62);
+  --edge:rgba(255,255,255,.85); --edge-dim:rgba(255,255,255,.30); --gloss:.55;
+  --shadow:0 14px 38px rgba(38,58,120,.16);
+  --fg:#12233a; --muted:#475b73; --line:rgba(18,35,58,.11);
+  --accent:#2d6cf5; --accent-2:#14a3d8; --accent-fg:#ffffff; --accent-soft:rgba(45,108,245,.14);
+  --bar-top:#8fb8ff; --bar-bot:#4f86ee; --bar-sel-top:#3b7bff; --bar-sel-bot:#1d4fc4;
+  --ok-bg:rgba(30,170,100,.17); --ok-fg:#0d6a3a; --bad-bg:rgba(236,64,64,.15); --bad-fg:#a91f19;
+  --warn-bg:rgba(240,170,30,.20); --warn-fg:#7a4f00; --focus:#2d6cf5;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg0:#0a0f1f; --b1:#2a55f0; --b2:#0ea89b; --b3:#7a3fe0; --b4:#d9573f; --blob-o:.52;
+  --glass:rgba(26,38,68,.46); --glass-2:rgba(34,48,84,.62); --glass-in:rgba(255,255,255,.08);
+  --edge:rgba(255,255,255,.24); --edge-dim:rgba(255,255,255,.05); --gloss:.16;
+  --shadow:0 16px 44px rgba(0,0,0,.5);
+  --fg:#e9f0fc; --muted:#a0b2ca; --line:rgba(255,255,255,.11);
+  --accent:#5b98ff; --accent-2:#35c3f0; --accent-fg:#06142d; --accent-soft:rgba(91,152,255,.2);
+  --bar-top:#4a78c9; --bar-bot:#2c4f8e; --bar-sel-top:#7fb6ff; --bar-sel-bot:#4a86e8;
+  --ok-bg:rgba(60,200,130,.18); --ok-fg:#7ee3ab; --bad-bg:rgba(255,100,100,.18); --bad-fg:#ffa39d;
+  --warn-bg:rgba(255,190,60,.18); --warn-fg:#ffd27a; --focus:#7fb6ff; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg0:#0a0f1f; --b1:#2a55f0; --b2:#0ea89b; --b3:#7a3fe0; --b4:#d9573f; --blob-o:.52;
+  --glass:rgba(26,38,68,.46); --glass-2:rgba(34,48,84,.62); --glass-in:rgba(255,255,255,.08);
+  --edge:rgba(255,255,255,.24); --edge-dim:rgba(255,255,255,.05); --gloss:.16;
+  --shadow:0 16px 44px rgba(0,0,0,.5);
+  --fg:#e9f0fc; --muted:#a0b2ca; --line:rgba(255,255,255,.11);
+  --accent:#5b98ff; --accent-2:#35c3f0; --accent-fg:#06142d; --accent-soft:rgba(91,152,255,.2);
+  --bar-top:#4a78c9; --bar-bot:#2c4f8e; --bar-sel-top:#7fb6ff; --bar-sel-bot:#4a86e8;
+  --ok-bg:rgba(60,200,130,.18); --ok-fg:#7ee3ab; --bad-bg:rgba(255,100,100,.18); --bad-fg:#ffa39d;
+  --warn-bg:rgba(255,190,60,.18); --warn-fg:#ffd27a; --focus:#7fb6ff; color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg0);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+.sub{font-size:11px;color:var(--muted);white-space:normal;max-width:240px;line-height:1.35;margin-top:1px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;color:var(--muted)}
+td.wrap{white-space:normal;min-width:220px;max-width:340px}
+.form .span3{grid-column:1/-1}
+
+/* latar mesh */
+.mesh{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.mesh i{position:absolute;border-radius:50%;filter:blur(70px);opacity:var(--blob-o)}
+.mesh i:nth-child(1){width:46vw;height:46vw;left:-8vw;top:-10vw;background:var(--b1)}
+.mesh i:nth-child(2){width:40vw;height:40vw;right:-6vw;top:8vh;background:var(--b3)}
+.mesh i:nth-child(3){width:44vw;height:44vw;left:22vw;bottom:-18vw;background:var(--b2)}
+.mesh i:nth-child(4){width:30vw;height:30vw;right:6vw;bottom:-8vw;background:var(--b4)}
+@media (prefers-reduced-motion:no-preference){
+  .mesh i:nth-child(1){animation:drift1 26s ease-in-out infinite alternate}
+  .mesh i:nth-child(3){animation:drift2 32s ease-in-out infinite alternate}
+}
+@keyframes drift1{to{transform:translate(6vw,5vh)}}
+@keyframes drift2{to{transform:translate(-7vw,-4vh)}}
+
+/* permukaan kaca */
+.glass{position:relative;isolation:isolate;background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(175%);backdrop-filter:blur(26px) saturate(175%);
+  border:1px solid var(--edge);border-radius:24px;box-shadow:var(--shadow),inset 0 1px 0 var(--edge),inset 0 -1px 0 var(--edge-dim)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:linear-gradient(140deg,rgba(255,255,255,.7) 0%,rgba(255,255,255,0) 34%,rgba(255,255,255,0) 70%,rgba(255,255,255,.22) 100%);opacity:var(--gloss)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:var(--glass-2)}}
+
+/* login */
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.login{width:100%;max-width:392px;padding:30px 28px}
+.badge{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,var(--accent-2),var(--accent));color:#fff;font-weight:700;display:grid;place-items:center;font-size:14px;margin-bottom:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 8px 18px rgba(45,108,245,.35)}
+.login h1{font-size:21px;font-weight:700;line-height:1.25;letter-spacing:-.01em}
+.login .sub{color:var(--muted);font-size:13px;margin:6px 0 16px}
+label{display:block;font-size:12px;font-weight:600;margin:12px 0 5px;color:var(--muted)}
+.in{width:100%;height:40px;border:1px solid var(--edge);background:var(--glass-in);border-radius:12px;padding:0 12px;font-size:13px;box-shadow:inset 0 1px 3px rgba(18,35,58,.08)}
+textarea.in{height:auto;padding:10px 12px;min-height:110px;resize:vertical}
+.in::placeholder{color:var(--muted);opacity:.65}
+.pw{position:relative}
+.pw .eye{position:absolute;right:5px;top:4px;width:32px;height:32px;border:0;background:none;cursor:pointer;color:var(--muted);border-radius:9px;display:grid;place-items:center}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn{height:40px;border:1px solid var(--edge);border-radius:999px;padding:0 18px;font-weight:600;font-size:13px;cursor:pointer;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 92%,#fff),var(--accent));color:var(--accent-fg);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 6px 16px rgba(45,108,245,.28);display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.btn:hover{filter:brightness(1.07)}
+.btn.block{width:100%;margin-top:18px}
+.btn.soft{background:var(--glass-in);color:var(--fg);box-shadow:inset 0 1px 0 var(--edge),0 2px 8px rgba(18,35,58,.08)}
+.btn.danger{background:var(--bad-bg);color:var(--bad-fg);box-shadow:none}
+.btn.sm{height:32px;padding:0 13px;font-size:12px}
+.demo{margin-top:16px;background:var(--glass-in);border:1px solid var(--edge-dim);border-radius:14px;padding:11px 13px;font-size:11.5px;color:var(--muted)}
+.demo b{color:var(--fg)}
+.err{margin-top:12px;background:var(--bad-bg);color:var(--bad-fg);border-radius:12px;padding:10px 13px;font-size:12.5px}
+.themebtn{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:max(14px,env(safe-area-inset-right,0px));z-index:5}
+
+/* shell */
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh}
+.side{margin:14px 0 14px max(14px,env(safe-area-inset-left,0px));padding:20px 12px 14px;display:flex;flex-direction:column;position:sticky;top:14px;height:calc(100vh - 28px);align-self:start}
+.brand{display:flex;gap:10px;align-items:center;padding:0 6px}
+.brand .badge{width:36px;height:36px;border-radius:12px;font-size:11px;margin:0}
+.brand b{display:block;font-size:14px;letter-spacing:-.01em}
+.brand small{display:block;font-size:10.5px;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:4px;margin-top:22px}
+.nav button{background:none;border:1px solid transparent;color:inherit;text-align:left;padding:10px 12px;border-radius:14px;cursor:pointer;font-size:13.5px;display:flex;align-items:center;gap:10px;color:var(--muted)}
+.nav button:hover{background:var(--glass-in)}
+.nav button[aria-current="page"]{background:var(--glass-2);border-color:var(--edge);color:var(--fg);font-weight:600;box-shadow:inset 0 1px 0 var(--edge),0 4px 12px rgba(18,35,58,.1)}
+.nav button[aria-current="page"] .ic{color:var(--accent)}
+.sidefoot{margin-top:auto;display:grid;gap:8px}
+.main{padding:18px max(18px,env(safe-area-inset-right,0px)) 40px 20px;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.top h1{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.who{padding:7px 15px;font-size:11.5px;color:var(--muted);border-radius:999px}
+.who b{color:var(--fg)}
+.card{padding:18px 20px;min-width:0}
+.card+.card{margin-top:16px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.kpis>.card{margin-top:0;padding:15px 18px}
+.kpi .l{font-size:11.5px;color:var(--muted);font-weight:500}
+.kpi .v{font-size:25px;font-weight:700;margin:4px 0 2px;letter-spacing:-.02em;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.kpi .s{font-size:10.5px;color:var(--muted)}
+.delta{font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;letter-spacing:0}
+.delta.up{background:var(--ok-bg);color:var(--ok-fg)}
+.delta.down{background:var(--bad-bg);color:var(--bad-fg)}
+.delta.flat{background:var(--glass-in);color:var(--muted)}
+.cols{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.cols>.card{margin-top:0}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.head h2{font-size:15px;font-weight:700;letter-spacing:-.01em}
+.head .note{font-size:11px;color:var(--muted)}
+.sel{height:38px;border:1px solid var(--edge);border-radius:999px;background:var(--glass-in);padding:0 14px;font-size:13px;max-width:100%;box-shadow:inset 0 1px 0 var(--edge)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--glass-in);border:1px solid var(--edge-dim)}
+.seg button{border:0;background:none;height:30px;padding:0 13px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--glass-2);color:var(--fg);box-shadow:inset 0 1px 0 var(--edge),0 2px 8px rgba(18,35,58,.12)}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--font)}
+.chart .val{fill:var(--fg);font-size:10.5px;font-weight:600}
+.chart .axis{stroke:var(--line);stroke-width:1}
+.chart .tl{stroke:var(--accent-2);stroke-width:1.3;stroke-dasharray:5 4}
+.chart .tt{fill:var(--accent-2);font-size:10px;font-weight:600}
+.cnote{font-size:11px;color:var(--muted);margin-top:6px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th{background:var(--glass-in);text-align:left;font-size:11.5px;font-weight:700;padding:10px 11px;white-space:nowrap;color:var(--muted)}
+th:first-child{border-radius:12px 0 0 12px}th:last-child{border-radius:0 12px 12px 0}
+th .sb{background:none;border:0;font:inherit;color:inherit;cursor:pointer;padding:0;display:inline-flex;gap:4px;align-items:center}
+th .sb[data-on="1"]{color:var(--accent)}
+td{padding:11px;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.pos{color:var(--ok-fg);font-weight:600}.neg{color:var(--bad-fg);font-weight:600}
+.chip{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
+.chip.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.chip.bad{background:var(--bad-bg);color:var(--bad-fg)}
+.chip.wait{background:var(--warn-bg);color:var(--warn-fg)}
+.banner{background:var(--accent-soft);color:var(--fg);border-radius:14px;padding:10px 14px;font-size:12px;margin-bottom:6px}
+.form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 14px}
+.form .act{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.preview{grid-column:1/-1;margin-top:14px;padding:11px 14px;border-radius:14px;background:var(--glass-in);border:1px dashed var(--line);font-size:12.5px;color:var(--muted);display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center}
+.preview b{color:var(--fg)}
+.empty{padding:26px 10px;text-align:center;color:var(--muted)}
+.rules{margin:0;padding-left:18px;color:var(--muted);font-size:12.5px;display:grid;gap:6px}
+.dec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.dec>div{background:var(--glass-in);border:1px solid var(--edge-dim);border-radius:18px;padding:14px 16px}
+.dec h3{font-size:13px;font-weight:700;margin-bottom:4px}
+.dec p{font-size:12px;color:var(--muted)}
+.dec .rec{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12.5px;color:var(--fg)}
+.dec .rec small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+.prog{height:9px;border-radius:999px;background:var(--glass-in);border:1px solid var(--edge-dim);overflow:hidden;margin:6px 0 4px}
+.prog i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent-2),var(--accent))}
+.prog.good i{background:linear-gradient(90deg,#3dd68c,#17a35f)}
+.pl{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted)}
+.pl b{color:var(--fg)}
+.tgt+.tgt{margin-top:16px}
+.ins{margin:0;padding:0;list-style:none;display:grid;gap:9px}
+.ins li{font-size:12.5px;display:flex;gap:9px;align-items:flex-start}
+.ins li span{min-width:0}
+.ins li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;margin-top:6px;background:var(--accent)}
+.ins li.warn::before{background:#f0a21b}
+.ins li.good::before{background:#25b36a}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tools .seg{flex-wrap:wrap;border-radius:18px;max-width:100%}
+.tools .seg button{white-space:nowrap}
+.tools .in{height:38px;border-radius:999px;max-width:260px}
+.copybox{width:100%;min-height:110px;margin-top:10px}
+.qbar{display:flex;align-items:center;gap:10px;font-size:12.5px}
+.qbar .prog{flex:1;margin:0}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));padding:11px 18px;border-radius:999px;font-size:13px;z-index:20;max-width:calc(100% - 32px)}
+
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cols{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px;margin:12px max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));padding:12px 12px 8px}
+  .nav{flex-direction:row;margin:0;order:3;width:100%;overflow-x:auto;gap:2px}
+  .nav button{white-space:nowrap;padding:8px 12px}
+  .sidefoot{margin:0 0 0 auto;display:flex}
+  .main{padding:14px max(16px,env(safe-area-inset-right,0px)) 32px max(16px,env(safe-area-inset-left,0px))}
+  .form,.dec{grid-template-columns:minmax(0,1fr)}
+  .top h1{font-size:22px}
+}
+@media (max-width:420px){.kpis{grid-template-columns:minmax(0,1fr)}}
+
+/* laporan cetak / PDF */
+#printArea{display:none}
+@media print{
+  @page{size:A4 landscape;margin:14mm 12mm}
+  html,body{background:#fff!important;color:#000}
+  .mesh,#app,#toast{display:none!important}
+  #printArea{display:block;font-family:var(--font);font-size:10.5px;color:#000;line-height:1.4}
+  #printArea .ph{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:10px}
+  #printArea h1{font-size:17px;font-weight:700}
+  #printArea .ph p{font-size:11px;color:#333}
+  #printArea .pm{text-align:right;font-size:10px;color:#333}
+  #printArea h2{font-size:12.5px;font-weight:700;margin:16px 0 6px;break-after:avoid}
+  #printArea .pn{font-size:10px;color:#333;margin:4px 0}
+  #printArea table{width:100%;border-collapse:collapse;font-size:10px;margin-top:4px}
+  #printArea table.small{font-size:8.6px}
+  #printArea th{background:#eee!important;color:#000;border:1px solid #999;padding:4px 5px;border-radius:0!important;white-space:normal;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #printArea td{border:1px solid #bbb;padding:3px 5px;white-space:normal}
+  #printArea tr{break-inside:avoid}
+  #printArea .r{text-align:right}
+  #printArea .mono{font-size:8.6px;color:#000}
+  #printArea .pr{margin:4px 0;padding-left:18px;display:grid;gap:4px}
+  #printArea .sign{display:flex;justify-content:flex-end;margin-top:28px;break-inside:avoid}
+  #printArea .sign div{text-align:center;font-size:10.5px}
+}
+</style>
+
+<div class="mesh" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<div id="app"></div>
+<div id="toast" class="glass" role="status" hidden></div>
+
+<script>
+const SEED = [["2026-01-01","yoL8EsaJd_w","Klasemen Pekan ke-16: Juventus Naik ke Papan Atas, Persik Kediri Terseok",889,158973,1334597,14837],["2026-01-02","QPplH8ACyjk","Highlight Juventus vs Borneo FC: Drama 9 Gol dan Kartu Merah",988,111641,745885,11829],["2026-01-03","mBQlm7knI4p","Highlight Borneo FC vs Arsenal: Drama 10 Gol dan Kartu Merah",362,131738,418827,18175],["2026-01-04","FC8ZrXbeg_f","Persis Solo vs Garuda Muda: 9 Momen Panas yang Bikin Stadion Bergemuruh",471,75616,269974,16358],["2026-01-05","G-h8msMlc-T","Kilas Balik Bayern Munchen vs Persis Solo: Laga Dramatis yang Masih Dikenang Suporter",558,140030,702016,18917],["2026-01-06","9sdbEl7oX8n","Evaluasi Inter Milan Pekan ke-4: Siapa Pemain Paling Menonjol?",472,168193,602572,10793],["2026-01-07","uvtdgDW1-In","Jelang PSM Makassar vs PSIS Semarang: Prediksi Susunan Pemain dan Skor Akhir",544,157300,589113,12579],["2026-01-08","K6yc-jecsbl","Sejarah Rivalitas Timnas Indonesia dan Barcelona yang Jarang Dibahas",1076,202635,1245711,17311],["2026-01-09","2vnXK6-Zy2G","Highlight Manchester City vs Persebaya: Drama 6 Gol dan Kartu Merah",453,111539,386114,19130],["2026-01-10","yJV9YZGWNkJ","Peluang Dewa United Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",619,193317,769348,13134],["2026-01-11","gBhcpqIuRhW","Analisis Taktik Manchester City: Kenapa Lini Belakang Sering Kebobolan?",947,41003,282983,9995],["2026-01-12","6ag5t_Zj3ao","Jelang Arema FC vs Arsenal: Prediksi Susunan Pemain dan Skor Akhir",448,149443,534086,18749],["2026-01-13","HGwlifXjw9A","Kilas Balik Persija vs Malut United: Laga Dramatis yang Masih Dikenang Suporter",706,158375,1014995,7910],["2026-01-15","8Dy-3XzZmBN","Kilas Balik Timnas U-23 vs Real Madrid: Laga Dramatis yang Masih Dikenang Suporter",820,143021,1073412,15342],["2026-01-16","yTBGTCuSsH5","Klasemen Pekan ke-28: Liverpool Naik ke Papan Atas, Manchester City Terseok",494,145806,681530,11350],["2026-01-17","iJLwbL132Zn","Bursa Transfer Dewa United: 4 Pemain Incaran yang Lagi Ramai Dibahas",935,184293,1530348,19798],["2026-01-18","-WvXX2HdNK4","Kilas Balik Manchester City vs Barito Putera: Laga Dramatis yang Masih Dikenang Suporter",598,80328,359315,17723],["2026-01-19","XQVIoSTsp5s","Perebutan Papan Atas: Garuda Muda atau Barito Putera, Siapa Lebih Konsisten?",821,155932,1013456,20800],["2026-01-20","TlGrwQ2d8m3","7 Fakta Unik Bali United Musim Ini yang Bikin Geleng-Geleng",650,191732,767707,13074],["2026-01-21","n2cldhT-7JZ","3 Pemain Muda PSIS Semarang yang Layak Dapat Menit Bermain Lebih Banyak",856,159947,1134545,10995],["2026-01-22","UDevwBJSMgl","Peluang Timnas U-23 Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",742,76568,537470,14384],["2026-01-23","Fo95X07mVvp","Klasemen Pekan ke-31: Garuda Muda Naik ke Papan Atas, Borneo FC Terseok",956,175503,1078953,7869],["2026-01-24","OHQ9UODdfdF","Bursa Transfer Liverpool: 7 Pemain Incaran yang Lagi Ramai Dibahas",1012,188573,1051593,7677],["2026-01-25","lA2D-FNQEoQ","Peluang Inter Milan Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",943,133922,918055,14827],["2026-01-26","Z90txdegvcU","Evaluasi Timnas Indonesia Pekan ke-12: Siapa Pemain Paling Menonjol?",383,190894,537918,16653],["2026-01-27","lJ2m7erV7xn","Jelang Juventus vs Timnas Indonesia: Prediksi Susunan Pemain dan Skor Akhir",988,190846,1538793,19497],["2026-01-28","oVGbuLI4C0G","Inter Milan Tertahan di Kandang: 7 Penyebab yang Perlu Dibenahi",596,116765,392078,18531],["2026-01-29","xed3XBYqpNn","Analisis Taktik Bayern Munchen: Kenapa Lini Belakang Sering Kebobolan?",618,77745,394753,11149],["2026-01-30","IYnqdodrN1o","Bursa Transfer Madura United: 10 Pemain Incaran yang Lagi Ramai Dibahas",607,188911,805020,11318],["2026-01-31","t_lRC3ZWYdz","Evaluasi Barito Putera Pekan ke-16: Siapa Pemain Paling Menonjol?",635,63966,329929,17375],["2026-02-02","2omtTtvM5ri","Evaluasi Borneo FC Pekan ke-26: Siapa Pemain Paling Menonjol?",489,103118,313982,18825],["2026-02-02","IYLsD6c060Z","Rekap Pekan ke-27: 3 Gol Terbaik yang Wajib Ditonton",365,108448,282121,13623],["2026-02-04","DNhmMLm43B3","Peluang Persik Kediri Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",526,103244,416450,13955],["2026-02-07","2OLMdNJTkzc","Madura United Tertahan di Kandang: 3 Penyebab yang Perlu Dibenahi",524,111641,371160,13620],["2026-02-07","XhWNEuCbY-e","4 Fakta Unik Timnas Indonesia Musim Ini yang Bikin Geleng-Geleng",719,105382,537682,9248],["2026-02-07","kfcDWKbFYV6","Sejarah Rivalitas PSS Sleman dan Manchester City yang Jarang Dibahas",808,104531,720481,19746],["2026-02-08","c123ybgnl8L","Klasemen Pekan ke-34: Manchester City Naik ke Papan Atas, Garuda Muda Terseok",951,37128,264315,16199],["2026-02-09","7wQqVThu1r2","Klasemen Pekan ke-15: Borneo FC Naik ke Papan Atas, Madura United Terseok",637,108927,523324,15400],["2026-02-10","m2rBvqZptcS","Sejarah Rivalitas Malut United dan Juventus yang Jarang Dibahas",1011,41332,383659,20611],["2026-02-12","cg-8-8oeNu9","Kilas Balik Borneo FC vs Liverpool: Laga Dramatis yang Masih Dikenang Suporter",977,105982,600066,14777],["2026-02-13","9pUNlWbDrio","Persik Kediri vs Persib: 4 Momen Panas yang Bikin Stadion Bergemuruh",961,110375,905414,11725],["2026-02-13","G1_ONo64osf","Evaluasi Timnas Indonesia Pekan ke-17: Siapa Pemain Paling Menonjol?",810,28167,208262,10375],["2026-02-14","70l5EEM43On","Dewa United vs Persebaya: 3 Momen Panas yang Bikin Stadion Bergemuruh",456,109229,286838,13862],["2026-02-14","xr_BkuSzwPM","5 Pemain Muda Garuda Muda yang Layak Dapat Menit Bermain Lebih Banyak",551,110153,366397,17875],["2026-02-15","VwnDeV3yQjV","Persija vs PSS Sleman: 9 Momen Panas yang Bikin Stadion Bergemuruh",714,29795,198451,11787],["2026-02-16","fwTfg-uWMvn","Madura United vs Manchester City: 3 Momen Panas yang Bikin Stadion Bergemuruh",919,31376,166256,18415],["2026-02-17","9te7WmA9i7w","4 Fakta Unik Persik Kediri Musim Ini yang Bikin Geleng-Geleng",656,49495,289523,14573],["2026-02-18","r4Z_4w3WNq8","Highlight Timnas Indonesia vs Madura United: Drama 7 Gol dan Kartu Merah",728,109992,744032,14540],["2026-02-18","-OcmKYDF2l9","Jelang Madura United vs PSIS Semarang: Prediksi Susunan Pemain dan Skor Akhir",543,106840,416510,14637],["2026-02-18","QD72XQvUs55","Analisis Taktik Bali United: Kenapa Lini Belakang Sering Kebobolan?",641,111862,403437,15180],["2026-02-19","8LHTE_2ihz1","Perebutan Papan Atas: Malut United atau Persib, Siapa Lebih Konsisten?",997,108426,1028672,13913],["2026-02-19","2eEsgJ6uk1k","4 Pemain Muda Juventus yang Layak Dapat Menit Bermain Lebih Banyak",864,111803,521424,15462],["2026-02-20","pPTXsPPc3-j","Analisis Taktik PSS Sleman: Kenapa Lini Belakang Sering Kebobolan?",985,105154,783627,16938],["2026-02-22","KnPnEbpAh-2","Rekap Pekan ke-33: 7 Gol Terbaik yang Wajib Ditonton",399,108796,311071,18366],["2026-02-23","6XmK6RCKsKC","Highlight Timnas U-23 vs Liverpool: Drama 7 Gol dan Kartu Merah",543,107226,523497,11274],["2026-02-24","oSY_C0tLOkQ","Analisis Taktik Liverpool: Kenapa Lini Belakang Sering Kebobolan?",736,38477,235028,15892],["2026-02-24","fx6zErjulaL","Perebutan Papan Atas: Barcelona atau Persib, Siapa Lebih Konsisten?",917,104349,670245,14378],["2026-02-24","dxFmZPCvFcw","Klasemen Pekan ke-15: Madura United Naik ke Papan Atas, PSS Sleman Terseok",552,107615,538921,13913],["2026-02-27","uYyGTo7LjmL","Highlight PSIS Semarang vs PSM Makassar: Drama 3 Gol dan Kartu Merah",860,103875,629978,12678],["2026-02-28","ZJ20fdb-d7d","Jelang Barito Putera vs Persib: Prediksi Susunan Pemain dan Skor Akhir",901,109705,715729,14987],["2026-03-01","fuA9dvhMzHW","Rekap Pekan ke-31: 5 Gol Terbaik yang Wajib Ditonton",536,176976,547931,10911],["2026-03-02","lsjRRkqclBd","3 Pemain Muda Barito Putera yang Layak Dapat Menit Bermain Lebih Banyak",738,131039,647038,11449],["2026-03-03","4VgmfkqiEZI","Highlight Bali United vs Barito Putera: Drama 7 Gol dan Kartu Merah",787,150627,983152,14172],["2026-03-04","J6ajz3HUlVO","Evaluasi Malut United Pekan ke-1: Siapa Pemain Paling Menonjol?",710,170987,771849,15912],["2026-03-06","2v5nTr53VaY","Real Madrid Tertahan di Kandang: 7 Penyebab yang Perlu Dibenahi",620,137271,641885,17696],["2026-03-07","ZWhbLpKGVHK","Real Madrid vs Persik Kediri: 3 Momen Panas yang Bikin Stadion Bergemuruh",800,144660,926344,9464],["2026-03-08","pTudVVGtZpq","Persis Solo vs Bali United: 4 Momen Panas yang Bikin Stadion Bergemuruh",538,184618,943641,17152],["2026-03-09","Q9patiIUJLe","Jelang Arsenal vs Timnas U-23: Prediksi Susunan Pemain dan Skor Akhir",778,172251,883635,23056],["2026-03-10","m5q66lPnIs_","Kilas Balik Barito Putera vs Manchester City: Laga Dramatis yang Masih Dikenang Suporter",431,142811,362454,16058],["2026-03-11","N91htMJrA0v","Peluang Persib Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",758,143555,668537,10117],["2026-03-12","OWQR_PL1HJX","Bursa Transfer Inter Milan: 5 Pemain Incaran yang Lagi Ramai Dibahas",867,120658,562960,14468],["2026-03-13","eTNH8ubaqsP","Real Madrid Tertahan di Kandang: 6 Penyebab yang Perlu Dibenahi",391,135858,364345,18294],["2026-03-14","-xYh1WHya4E","Bursa Transfer Timnas Indonesia: 3 Pemain Incaran yang Lagi Ramai Dibahas",577,151639,715870,14751],["2026-03-15","PkGwS1YrspX","Rekap Pekan ke-27: 6 Gol Terbaik yang Wajib Ditonton",437,149139,582323,11695],["2026-03-16","J3jnOblovC5","8 Pemain Muda Barcelona yang Layak Dapat Menit Bermain Lebih Banyak",751,119959,750576,16417],["2026-03-17","klGT1L7gDHw","Analisis Taktik Malut United: Kenapa Lini Belakang Sering Kebobolan?",772,146828,952613,11971],["2026-03-18","GFvZDUj5gpm","7 Pemain Muda PSS Sleman yang Layak Dapat Menit Bermain Lebih Banyak",408,140820,448133,12501],["2026-03-19","SRknOKrBh0i","Evaluasi Borneo FC Pekan ke-30: Siapa Pemain Paling Menonjol?",750,172260,846930,15171],["2026-03-20","7LXHu7vNpVt","Bayern Munchen vs Persik Kediri: 5 Momen Panas yang Bikin Stadion Bergemuruh",815,175944,1214926,14576],["2026-03-21","YXpVLuoQOFe","Jelang Timnas Indonesia vs Inter Milan: Prediksi Susunan Pemain dan Skor Akhir",861,142684,894989,16234],["2026-03-22","cPhp-X_Ln7n","Perebutan Papan Atas: Persis Solo atau Persebaya, Siapa Lebih Konsisten?",662,147937,749447,11933],["2026-03-23","emYKcnnuweu","Evaluasi Garuda Muda Pekan ke-32: Siapa Pemain Paling Menonjol?",965,134244,1203336,15051],["2026-03-24","uQdn-dRTs4L","Sejarah Rivalitas Borneo FC dan Persik Kediri yang Jarang Dibahas",950,171386,1534328,17779],["2026-03-25","eyvi6MAoNMg","Perebutan Papan Atas: PSS Sleman atau Timnas Indonesia, Siapa Lebih Konsisten?",548,123073,408442,16540],["2026-03-26","82I9Zjlsskg","Klasemen Pekan ke-17: Timnas U-23 Naik ke Papan Atas, Persija Terseok",403,116756,325374,17009],["2026-03-27","Y9fMIygIE1j","Perebutan Papan Atas: Real Madrid atau Timnas U-23, Siapa Lebih Konsisten?",865,110737,881559,20210],["2026-03-28","8cyeTCfZP4I","Evaluasi Bali United Pekan ke-29: Siapa Pemain Paling Menonjol?",955,43598,252413,20285],["2026-03-29","guNDBHszUEa","Bursa Transfer Real Madrid: 9 Pemain Incaran yang Lagi Ramai Dibahas",870,44428,348322,10532],["2026-03-30","fTAhpE8uu5I","4 Pemain Muda Malut United yang Layak Dapat Menit Bermain Lebih Banyak",865,75250,585867,14983],["2026-03-31","GhTLJYCTEzv","Evaluasi PSM Makassar Pekan ke-13: Siapa Pemain Paling Menonjol?",557,69596,336554,16877],["2026-04-01","L-Sv4VHfckq","Evaluasi Bayern Munchen Pekan ke-1: Siapa Pemain Paling Menonjol?",432,177267,643571,12034],["2026-04-02","5-uSN3R79Mr","Bursa Transfer Bali United: 6 Pemain Incaran yang Lagi Ramai Dibahas",1001,147278,934666,16925],["2026-04-03","-IYV7ELJ715","Persebaya vs Borneo FC: 9 Momen Panas yang Bikin Stadion Bergemuruh",434,140549,559013,9669],["2026-04-04","AVVCtePDOIa","9 Fakta Unik Timnas Indonesia Musim Ini yang Bikin Geleng-Geleng",423,90774,265683,13824],["2026-04-05","eBlrLl6UhdX","8 Pemain Muda Borneo FC yang Layak Dapat Menit Bermain Lebih Banyak",530,172369,667246,18981],["2026-04-06","e7qVhlnc52H","Bursa Transfer Real Madrid: 10 Pemain Incaran yang Lagi Ramai Dibahas",836,72427,503994,13864],["2026-04-07","76F3AJV2QUG","Jelang Barito Putera vs PSIS Semarang: Prediksi Susunan Pemain dan Skor Akhir",971,164287,1490647,11099],["2026-04-08","pQRGf_AEu4B","Jelang Inter Milan vs Real Madrid: Prediksi Susunan Pemain dan Skor Akhir",950,137170,1155043,9837],["2026-04-09","cqr6YXUva0l","Jelang Liverpool vs Inter Milan: Prediksi Susunan Pemain dan Skor Akhir",739,109031,476252,14750],["2026-04-10","V3l1daZGP22","Rekap Pekan ke-16: 10 Gol Terbaik yang Wajib Ditonton",493,131031,356715,11410],["2026-04-11","c-Zn6LJyqzS","Sejarah Rivalitas Dewa United dan Madura United yang Jarang Dibahas",733,183499,830620,17688],["2026-04-12","8fRYWsPo7xW","5 Fakta Unik Persik Kediri Musim Ini yang Bikin Geleng-Geleng",831,139805,1051701,13573],["2026-04-13","92z0KH8FIHX","Klasemen Pekan ke-27: Real Madrid Naik ke Papan Atas, Persebaya Terseok",871,112002,867259,20017],["2026-04-14","W3Hb6eqMRqr","6 Fakta Unik PSS Sleman Musim Ini yang Bikin Geleng-Geleng",598,130629,573974,10301],["2026-04-15","Mdxd41vAZfn","Kilas Balik Malut United vs Timnas U-23: Laga Dramatis yang Masih Dikenang Suporter",560,127424,554439,9877],["2026-04-16","yHjuhwpdba8","Klasemen Pekan ke-8: PSS Sleman Naik ke Papan Atas, Persib Terseok",868,161166,1284492,15089],["2026-04-17","POVQw8l-5M_","Peluang Timnas Indonesia Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",825,72284,546587,12162],["2026-04-18","YTYLeXQQ-3t","Malut United vs Bayern Munchen: 4 Momen Panas yang Bikin Stadion Bergemuruh",642,133703,750324,13260],["2026-04-19","bBsfWH3Dqie","Analisis Taktik Real Madrid: Kenapa Lini Belakang Sering Kebobolan?",362,153984,408261,14238],["2026-04-20","9KgdcFlBr83","Evaluasi Bali United Pekan ke-24: Siapa Pemain Paling Menonjol?",832,155748,786234,10621],["2026-04-21","HZiBjN6FlYR","Kilas Balik Bali United vs Persebaya: Laga Dramatis yang Masih Dikenang Suporter",460,83978,255299,7500],["2026-04-22","zIUwuZ3UVs_","Highlight Persib vs Barcelona: Drama 8 Gol dan Kartu Merah",903,129798,1062919,14106],["2026-04-23","dlyC-laFwcD","Analisis Taktik Borneo FC: Kenapa Lini Belakang Sering Kebobolan?",602,141303,484171,17275],["2026-04-24","MPDSgxdewZP","Rekap Pekan ke-2: 6 Gol Terbaik yang Wajib Ditonton",392,165237,447407,13717],["2026-04-25","fW6ndxrAe8q","10 Fakta Unik Juventus Musim Ini yang Bikin Geleng-Geleng",708,180245,869086,12037],["2026-04-26","NmLrjoLK1lI","Evaluasi Dewa United Pekan ke-6: Siapa Pemain Paling Menonjol?",875,116917,715594,11988],["2026-04-27","QjPoobtH-hf","Evaluasi Manchester City Pekan ke-10: Siapa Pemain Paling Menonjol?",997,154656,1303364,12277],["2026-04-28","Hyb4Iow5lw3","Perebutan Papan Atas: Liverpool atau Malut United, Siapa Lebih Konsisten?",1051,184891,1690515,10105],["2026-04-29","RaUdZEEcaJ6","Liverpool vs Bali United: 3 Momen Panas yang Bikin Stadion Bergemuruh",703,35982,152910,16063],["2026-04-30","hNW734jNtnl","9 Pemain Muda Persis Solo yang Layak Dapat Menit Bermain Lebih Banyak",400,168579,527823,14430],["2026-05-01","qP-V2LeJCLu","Analisis Taktik PSM Makassar: Kenapa Lini Belakang Sering Kebobolan?",504,111073,326574,10791],["2026-05-02","2PIT5g5tIrX","Peluang Arema FC Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",1032,177607,1419763,7530],["2026-05-03","Cy-1bz4CZA-","Perebutan Papan Atas: Barcelona atau Persija, Siapa Lebih Konsisten?",943,78069,408454,14334],["2026-05-04","rsYh7eCVQO7","Peluang Persija Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",943,176419,989446,7500],["2026-05-05","GrVupr1Qe3-","Kilas Balik Dewa United vs Borneo FC: Laga Dramatis yang Masih Dikenang Suporter",458,172378,622342,13711],["2026-05-06","Mn4wiWs1P2T","Liverpool vs Persija: 4 Momen Panas yang Bikin Stadion Bergemuruh",674,153579,665872,16939],["2026-05-07","DyTmuFNrovx","Perebutan Papan Atas: PSS Sleman atau Dewa United, Siapa Lebih Konsisten?",679,117127,553984,9989],["2026-05-08","PBvzCrFzSR1","Evaluasi Real Madrid Pekan ke-12: Siapa Pemain Paling Menonjol?",1002,159366,1102504,12136],["2026-05-09","Aq67kF8SFx8","Sejarah Rivalitas Arsenal dan Persis Solo yang Jarang Dibahas",642,190670,935033,11881],["2026-05-10","RxTquuwkp7i","Sejarah Rivalitas Liverpool dan Persebaya yang Jarang Dibahas",847,145001,704752,15955],["2026-05-11","onAR6LpBAn-","Bursa Transfer Barcelona: 7 Pemain Incaran yang Lagi Ramai Dibahas",1055,168104,1374117,8884],["2026-05-12","y-85QCEpdox","Sejarah Rivalitas PSIS Semarang dan Barito Putera yang Jarang Dibahas",984,120097,733448,15707],["2026-05-13","9xEUnYr_mWM","7 Fakta Unik Persija Musim Ini yang Bikin Geleng-Geleng",1048,153739,1246556,16317],["2026-05-14","H6lq4x37xVr","Evaluasi Arsenal Pekan ke-18: Siapa Pemain Paling Menonjol?",853,159183,1192798,15275],["2026-05-15","HPZ3JHG_eUs","Bursa Transfer Timnas Indonesia: 5 Pemain Incaran yang Lagi Ramai Dibahas",1039,151505,1482930,15515],["2026-05-17","H7uqvtPNOPM","Perebutan Papan Atas: Liverpool atau Barcelona, Siapa Lebih Konsisten?",369,172964,583674,15249],["2026-05-18","oNhTqsxY9c9","Jelang PSS Sleman vs Bayern Munchen: Prediksi Susunan Pemain dan Skor Akhir",411,105341,233417,18165],["2026-05-19","AcY1jOdwNvE","Klasemen Pekan ke-20: Liverpool Naik ke Papan Atas, Timnas Indonesia Terseok",1072,154429,1139080,15495],["2026-05-20","LxL8CKYg-yo","Highlight Timnas Indonesia vs Malut United: Drama 10 Gol dan Kartu Merah",1055,91197,924195,12737],["2026-05-21","WWF9fYY9kg8","10 Fakta Unik Manchester City Musim Ini yang Bikin Geleng-Geleng",826,164869,1181237,15642],["2026-05-22","R2rNCuboX_q","Persis Solo Tertahan di Kandang: 8 Penyebab yang Perlu Dibenahi",367,122640,323484,15581],["2026-05-23","cN1GRUf6EoM","Peluang Borneo FC Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",1035,186460,1824598,14661],["2026-05-24","Fz1xonEZ6dJ","Sejarah Rivalitas Madura United dan Persik Kediri yang Jarang Dibahas",878,115751,646762,16754],["2026-05-25","1ft2-mJY8Df","8 Pemain Muda Timnas Indonesia yang Layak Dapat Menit Bermain Lebih Banyak",490,167363,647115,13059],["2026-05-26","gPZ2RqRJT9I","Barito Putera vs Manchester City: 4 Momen Panas yang Bikin Stadion Bergemuruh",876,136188,697040,15995],["2026-05-27","v5is6IVwX-Q","3 Pemain Muda Juventus yang Layak Dapat Menit Bermain Lebih Banyak",992,154271,880224,17607],["2026-05-28","dMt6Ak0aIuX","3 Pemain Muda Persik Kediri yang Layak Dapat Menit Bermain Lebih Banyak",969,80116,562084,18977],["2026-05-29","fVx3od3jDiF","3 Pemain Muda Madura United yang Layak Dapat Menit Bermain Lebih Banyak",1011,158400,947805,16513],["2026-05-30","MTvk_C_Rf8N","Jelang Dewa United vs Persib: Prediksi Susunan Pemain dan Skor Akhir",717,181530,956777,13746],["2026-05-31","06N7H8Ynryw","Sejarah Rivalitas Persebaya dan Persik Kediri yang Jarang Dibahas",786,174564,1303508,16880],["2026-06-01","kTYUDJEHTFt","Evaluasi Timnas U-23 Pekan ke-27: Siapa Pemain Paling Menonjol?",815,204666,1368978,19670],["2026-06-02","esQMGu12EAu","Highlight Liverpool vs Persis Solo: Drama 8 Gol dan Kartu Merah",569,163325,584344,17521],["2026-06-03","U26fNgIEkM8","Arsenal vs Timnas U-23: 6 Momen Panas yang Bikin Stadion Bergemuruh",890,169263,823619,17271],["2026-06-04","EF_ZP149wIW","6 Pemain Muda Bali United yang Layak Dapat Menit Bermain Lebih Banyak",854,130390,1045759,16354],["2026-06-05","R3k9UTju8u7","Jelang Barcelona vs Bayern Munchen: Prediksi Susunan Pemain dan Skor Akhir",1023,190838,1081990,12152],["2026-06-06","rhw6gC3Nejw","4 Pemain Muda Manchester City yang Layak Dapat Menit Bermain Lebih Banyak",999,46407,394405,18177],["2026-06-07","Y1uPO3JkPkr","Persib Tertahan di Kandang: 9 Penyebab yang Perlu Dibenahi",561,150570,464831,13893],["2026-06-08","LaMUkt_yGYE","Sejarah Rivalitas Persis Solo dan Garuda Muda yang Jarang Dibahas",797,216831,1217504,17341],["2026-06-09","deD11Xqw6V4","Jelang PSS Sleman vs Timnas U-23: Prediksi Susunan Pemain dan Skor Akhir",386,146349,432776,17010],["2026-06-10","A2bjPHEZosY","Highlight Borneo FC vs Inter Milan: Drama 3 Gol dan Kartu Merah",846,136206,705201,16146],["2026-06-11","OLL1_9nprv3","Rekap Pekan ke-23: 3 Gol Terbaik yang Wajib Ditonton",755,70517,323534,17442],["2026-06-12","y2TRjBMKxW9","Timnas U-23 Tertahan di Kandang: 9 Penyebab yang Perlu Dibenahi",537,148671,693497,13979],["2026-06-13","K1aCd0Rk0kE","Klasemen Pekan ke-27: Persis Solo Naik ke Papan Atas, Barito Putera Terseok",886,178588,1370542,16788],["2026-06-14","OuRaHaMchhG","Borneo FC vs Timnas Indonesia: 3 Momen Panas yang Bikin Stadion Bergemuruh",972,190174,1581602,14587],["2026-06-15","JlhMIFdMjT1","Highlight Bayern Munchen vs PSIS Semarang: Drama 4 Gol dan Kartu Merah",1000,119278,771599,15320],["2026-06-16","BkavAo7RWvZ","PSS Sleman vs Real Madrid: 6 Momen Panas yang Bikin Stadion Bergemuruh",858,119905,977799,14553],["2026-06-17","P3AgMBrbLG_","Klasemen Pekan ke-9: Bayern Munchen Naik ke Papan Atas, Persebaya Terseok",593,157089,680861,15982],["2026-06-18","sh-9X8XI4_L","Jelang Persebaya vs Arsenal: Prediksi Susunan Pemain dan Skor Akhir",771,150657,683132,15830],["2026-06-19","YaOFC0h10Iy","Kilas Balik Timnas Indonesia vs Persebaya: Laga Dramatis yang Masih Dikenang Suporter",854,147880,799346,9512],["2026-06-20","ozUmPYhnRRb","5 Pemain Muda Real Madrid yang Layak Dapat Menit Bermain Lebih Banyak",711,170759,894893,11367],["2026-06-21","BhBkxly3Cns","Klasemen Pekan ke-8: Arema FC Naik ke Papan Atas, Juventus Terseok",756,194930,888526,15421],["2026-06-22","gB1hZx-F6Ma","Madura United vs Persebaya: 7 Momen Panas yang Bikin Stadion Bergemuruh",533,210667,632147,13448],["2026-06-23","RLkR__MOzIS","9 Pemain Muda Juventus yang Layak Dapat Menit Bermain Lebih Banyak",854,201442,1151561,7829],["2026-06-24","6Ci1OS7XBn4","Klasemen Pekan ke-16: Liverpool Naik ke Papan Atas, Barcelona Terseok",442,198404,656650,14567],["2026-06-25","Xazt1Xf-u3O","Jelang Bayern Munchen vs Inter Milan: Prediksi Susunan Pemain dan Skor Akhir",475,216548,802433,13079],["2026-06-26","XsGpeoJA-H4","Klasemen Pekan ke-1: Timnas Indonesia Naik ke Papan Atas, Dewa United Terseok",731,154075,624255,13895],["2026-06-27","vIm5vE2iElp","Peluang Persis Solo Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",365,123807,365061,9951],["2026-06-28","nt4KMIX6d-I","6 Pemain Muda Persik Kediri yang Layak Dapat Menit Bermain Lebih Banyak",752,167912,1080073,7500],["2026-06-29","1AgMKTIqxWM","5 Fakta Unik Bayern Munchen Musim Ini yang Bikin Geleng-Geleng",872,207292,1128453,10042],["2026-06-30","r-HACDjARuv","Highlight Dewa United vs Madura United: Drama 10 Gol dan Kartu Merah",792,135513,708655,15174],["2026-07-01","YNT1ugu90ij","Bursa Transfer Dewa United: 3 Pemain Incaran yang Lagi Ramai Dibahas",820,153268,1074544,13281],["2026-07-02","8A2-H2il7Gr","Bursa Transfer Borneo FC: 4 Pemain Incaran yang Lagi Ramai Dibahas",544,120944,614941,11387],["2026-07-03","daPuiz8SiY_","Jelang Arsenal vs Madura United: Prediksi Susunan Pemain dan Skor Akhir",878,182439,1035848,17561],["2026-07-04","UEBT0XDsbVb","5 Pemain Muda PSM Makassar yang Layak Dapat Menit Bermain Lebih Banyak",364,171750,401287,10519],["2026-07-05","byE_JlcS0_f","Jelang Timnas U-23 vs Barito Putera: Prediksi Susunan Pemain dan Skor Akhir",837,194584,1058038,9429],["2026-07-06","FDZVw0Lwbuf","Arema FC Tertahan di Kandang: 6 Penyebab yang Perlu Dibenahi",613,165201,811983,15780],["2026-07-07","Bic_582EkOm","Highlight Dewa United vs PSIS Semarang: Drama 5 Gol dan Kartu Merah",516,164247,563569,13892],["2026-07-08","JqUPHxogVV0","Peluang Malut United Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",703,193351,1230964,16087],["2026-07-09","LCfv3xBaxZR","Jelang PSS Sleman vs Garuda Muda: Prediksi Susunan Pemain dan Skor Akhir",841,115366,662117,15018],["2026-07-10","Xl7hn7rJFz4","Jelang Madura United vs Borneo FC: Prediksi Susunan Pemain dan Skor Akhir",407,213187,685551,11630],["2026-07-11","Atb5VpSpSrK","Highlight Juventus vs Arema FC: Drama 10 Gol dan Kartu Merah",414,108990,373930,18219],["2026-07-12","qMpyB-zSRYz","Klasemen Pekan ke-14: Inter Milan Naik ke Papan Atas, Bayern Munchen Terseok",423,110833,450948,9711],["2026-07-13","8ysy9Aobx8Z","Evaluasi Persik Kediri Pekan ke-5: Siapa Pemain Paling Menonjol?",761,172862,983782,16342],["2026-07-15","PC0sY4qbOE1","Bali United Tertahan di Kandang: 7 Penyebab yang Perlu Dibenahi",483,168439,624092,10395],["2026-07-16","6JbHlHTvIaf","Klasemen Pekan ke-14: Liverpool Naik ke Papan Atas, Timnas U-23 Terseok",752,169069,693525,23046],["2026-07-17","GpNYVObRCoO","Rekap Pekan ke-3: 6 Gol Terbaik yang Wajib Ditonton",491,127140,408675,14371],["2026-07-18","YCWHcr95CCh","Highlight Garuda Muda vs Arema FC: Drama 4 Gol dan Kartu Merah",770,132118,901346,13134],["2026-07-19","-wR2ZeMWMPu","Bursa Transfer Dewa United: 7 Pemain Incaran yang Lagi Ramai Dibahas",663,66211,248486,13474],["2026-07-20","bfK2DBrmXSC","Analisis Taktik Arema FC: Kenapa Lini Belakang Sering Kebobolan?",910,129273,930306,11688],["2026-07-21","oT5vM7xor9v","Bursa Transfer Barcelona: 10 Pemain Incaran yang Lagi Ramai Dibahas",518,123515,355135,17701],["2026-07-22","L7o1P6fss_N","Peluang Barcelona Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",457,212724,694188,10413],["2026-07-23","dsnITbkPpCn","Kilas Balik Liverpool vs PSS Sleman: Laga Dramatis yang Masih Dikenang Suporter",968,33331,275327,8625],["2026-07-24","5zUna0PqY16","Jelang PSS Sleman vs Malut United: Prediksi Susunan Pemain dan Skor Akhir",414,164420,563813,12740],["2026-07-25","DeaY4vjZ-Z7","Kilas Balik Borneo FC vs Malut United: Laga Dramatis yang Masih Dikenang Suporter",931,195834,1087407,13310],["2026-07-26","xiboop6cQve","3 Pemain Muda Inter Milan yang Layak Dapat Menit Bermain Lebih Banyak",1046,73809,543005,13817],["2026-07-27","Jf2zPaAA-Pc","Sejarah Rivalitas Persija dan Persik Kediri yang Jarang Dibahas",695,217686,890381,15571],["2026-07-28","EI7VWaeu5Tw","Klasemen Pekan ke-27: Malut United Naik ke Papan Atas, PSIS Semarang Terseok",1025,186126,1523619,16383],["2026-07-29","yszYMvPIpa-","Klasemen Pekan ke-15: Inter Milan Naik ke Papan Atas, Bali United Terseok",593,147846,572923,17923],["2026-07-30","lA1rYz-CPDH","PSIS Semarang Tertahan di Kandang: 5 Penyebab yang Perlu Dibenahi",875,176708,1108791,12883],["2026-07-31","GWSnOlhhdkd","Highlight Barcelona vs Persebaya: Drama 9 Gol dan Kartu Merah",709,216515,1292980,17162],["2026-08-01","qPYLwWbBqhK","Peluang Arsenal Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",970,205036,1465271,13903],["2026-08-02","3BIXCH5kPFM","Analisis Taktik Persija: Kenapa Lini Belakang Sering Kebobolan?",728,196372,1341501,20242],["2026-08-03","L3BcgGHw0Oe","Jelang Arema FC vs Manchester City: Prediksi Susunan Pemain dan Skor Akhir",868,130169,913636,15937],["2026-08-04","hnJwkZvzc2D","Rekap Pekan ke-18: 9 Gol Terbaik yang Wajib Ditonton",896,143469,765291,9657],["2026-08-05","DdC8rIxL_6E","Barito Putera Tertahan di Kandang: 10 Penyebab yang Perlu Dibenahi",561,182205,836861,12637],["2026-08-06","Cz1ntNDy4hK","Persib Tertahan di Kandang: 3 Penyebab yang Perlu Dibenahi",997,192436,1729688,15883],["2026-08-07","Lxb7E4JXAP_","Highlight Persik Kediri vs Arsenal: Drama 4 Gol dan Kartu Merah",420,193840,546038,17088],["2026-08-08","o6Oi5t41T96","Bursa Transfer Persija: 8 Pemain Incaran yang Lagi Ramai Dibahas",659,204817,1089119,15202],["2026-08-09","sEL69UjztmM","Klasemen Pekan ke-10: Persebaya Naik ke Papan Atas, Madura United Terseok",514,224492,743938,11265],["2026-08-10","Pbwns4rFdAN","5 Fakta Unik Timnas U-23 Musim Ini yang Bikin Geleng-Geleng",777,205356,862892,17114],["2026-08-11","T1OSnT_EQay","Klasemen Pekan ke-27: PSM Makassar Naik ke Papan Atas, Real Madrid Terseok",844,73698,559999,13340],["2026-08-12","S80T9Z5P7sP","Kilas Balik Borneo FC vs Inter Milan: Laga Dramatis yang Masih Dikenang Suporter",664,199363,1118264,7500],["2026-08-13","IgRi7kguxwp","Evaluasi Persebaya Pekan ke-17: Siapa Pemain Paling Menonjol?",456,145721,408059,12953],["2026-08-14","QxBQAqXA0K2","Klasemen Pekan ke-17: PSS Sleman Naik ke Papan Atas, Persija Terseok",472,128367,351208,16579],["2026-08-15","EPCyvMYshjB","Jelang Persis Solo vs Inter Milan: Prediksi Susunan Pemain dan Skor Akhir",742,212900,1293616,12281],["2026-08-16","1adCI7jU36f","Sejarah Rivalitas Borneo FC dan Timnas U-23 yang Jarang Dibahas",370,48918,103487,13726],["2026-08-18","-Z-TQJWxTqf","Sejarah Rivalitas Malut United dan Liverpool yang Jarang Dibahas",468,126715,352574,12666],["2026-08-19","lL9Y7frBLuL","Persis Solo Tertahan di Kandang: 4 Penyebab yang Perlu Dibenahi",645,125386,551809,15295],["2026-08-20","8JWznq4DV4D","4 Pemain Muda Madura United yang Layak Dapat Menit Bermain Lebih Banyak",990,207469,1223751,17542],["2026-08-21","56SoQc_jJtf","Sejarah Rivalitas Real Madrid dan Barito Putera yang Jarang Dibahas",525,187439,698716,10385],["2026-08-22","SYdkMbZGFPN","Persib vs Borneo FC: 10 Momen Panas yang Bikin Stadion Bergemuruh",780,173415,845076,12139],["2026-08-23","iNw4AGSIWs3","Kilas Balik Timnas Indonesia vs Timnas U-23: Laga Dramatis yang Masih Dikenang Suporter",659,159318,722782,12846],["2026-08-24","hIAaFaY4SDG","Barito Putera vs Juventus: 4 Momen Panas yang Bikin Stadion Bergemuruh",810,153364,723371,10677],["2026-08-25","uarU5gJTEGv","Klasemen Pekan ke-11: Inter Milan Naik ke Papan Atas, Timnas Indonesia Terseok",914,192432,1588261,20275],["2026-08-26","1Kpu0k-DfgB","Perebutan Papan Atas: Persik Kediri atau PSM Makassar, Siapa Lebih Konsisten?",723,193560,1279183,12877],["2026-08-27","2LpTN8ZPaTD","Evaluasi Timnas U-23 Pekan ke-13: Siapa Pemain Paling Menonjol?",645,132633,534172,8439],["2026-08-28","BLRre0g-Or6","Bursa Transfer Persija: 7 Pemain Incaran yang Lagi Ramai Dibahas",522,127283,525262,14516],["2026-08-29","WDGREc2IRPW","Sejarah Rivalitas PSM Makassar dan Timnas Indonesia yang Jarang Dibahas",806,190886,979635,21093],["2026-08-30","6wfwcrFZr0C","Evaluasi PSIS Semarang Pekan ke-3: Siapa Pemain Paling Menonjol?",689,178190,1147060,18250],["2026-08-31","ar1otrAk3Uq","Persik Kediri Tertahan di Kandang: 3 Penyebab yang Perlu Dibenahi",484,184107,523572,21494],["2026-09-01","nns7uf6PMFo","Timnas U-23 vs PSM Makassar: 7 Momen Panas yang Bikin Stadion Bergemuruh",581,192506,922636,10375],["2026-09-02","6ZBcvtwI89E","Bursa Transfer PSM Makassar: 5 Pemain Incaran yang Lagi Ramai Dibahas",568,231755,1221261,16332],["2026-09-03","NYtKviZGAqh","Kilas Balik Real Madrid vs Malut United: Laga Dramatis yang Masih Dikenang Suporter",676,185772,929848,10341],["2026-09-04","6SldNoaZxTY","3 Pemain Muda Persis Solo yang Layak Dapat Menit Bermain Lebih Banyak",1070,148422,1523711,14785],["2026-09-05","sShlk5dGr5x","Analisis Taktik Timnas U-23: Kenapa Lini Belakang Sering Kebobolan?",921,224918,1960446,15734],["2026-09-06","bFRi2nvepz0","5 Fakta Unik Dewa United Musim Ini yang Bikin Geleng-Geleng",798,130210,852444,13712],["2026-09-07","QwE0PItAgoD","Evaluasi Manchester City Pekan ke-12: Siapa Pemain Paling Menonjol?",437,155604,553687,14421],["2026-09-08","lBj8J4AhC82","Sejarah Rivalitas PSIS Semarang dan Arsenal yang Jarang Dibahas",972,114531,918044,9187],["2026-09-09","8dciBe82Kcd","Rekap Pekan ke-23: 5 Gol Terbaik yang Wajib Ditonton",669,181046,968648,16931],["2026-09-10","wTCWkbz89hS","Highlight Madura United vs Persija: Drama 9 Gol dan Kartu Merah",367,169650,336362,11284],["2026-09-11","L6hlKICY_2H","Bursa Transfer Manchester City: 7 Pemain Incaran yang Lagi Ramai Dibahas",777,172969,1015869,21760],["2026-09-12","ZM_mBaoSrNV","Perebutan Papan Atas: Arema FC atau Real Madrid, Siapa Lebih Konsisten?",743,177514,989995,13223],["2026-09-13","q_n68to9jSB","Bursa Transfer Manchester City: 3 Pemain Incaran yang Lagi Ramai Dibahas",463,181695,797194,13573],["2026-09-14","Ps6d_BpvOKv","Analisis Taktik Barcelona: Kenapa Lini Belakang Sering Kebobolan?",432,125371,421830,11901],["2026-09-15","snLsXaA8t7j","Klasemen Pekan ke-7: Malut United Naik ke Papan Atas, Persis Solo Terseok",671,178114,777270,12508],["2026-09-16","kS7jzE2dPLK","4 Pemain Muda Timnas U-23 yang Layak Dapat Menit Bermain Lebih Banyak",1019,227000,1346278,14129],["2026-09-17","K_ABm7WH51M","Persik Kediri vs Garuda Muda: 9 Momen Panas yang Bikin Stadion Bergemuruh",487,169043,667777,13840],["2026-09-18","MZMpneW5M6f","Rekap Pekan ke-2: 5 Gol Terbaik yang Wajib Ditonton",569,153200,824222,15462],["2026-09-19","x1Cf8JhfPZO","Rekap Pekan ke-16: 5 Gol Terbaik yang Wajib Ditonton",612,157959,734813,13431],["2026-09-20","vrS2p7h5HSk","Kilas Balik Persija vs Bali United: Laga Dramatis yang Masih Dikenang Suporter",1036,195171,1132852,18820],["2026-09-21","KUq6qaFSLG4","Perebutan Papan Atas: Manchester City atau Timnas Indonesia, Siapa Lebih Konsisten?",510,196637,654749,17470],["2026-09-22","PWB6xHpigcg","Persebaya vs Timnas Indonesia: 8 Momen Panas yang Bikin Stadion Bergemuruh",533,210226,1064681,12820],["2026-09-23","Y2qrquvx2ID","Evaluasi Persebaya Pekan ke-31: Siapa Pemain Paling Menonjol?",426,214208,648697,11401],["2026-09-24","jJV_zAaMP0Q","Jelang Juventus vs Real Madrid: Prediksi Susunan Pemain dan Skor Akhir",632,49989,283727,22051],["2026-09-25","nw4t75rBAto","Garuda Muda vs Dewa United: 10 Momen Panas yang Bikin Stadion Bergemuruh",551,187665,961485,15442],["2026-09-26","VQClPsiYvIr","Evaluasi Real Madrid Pekan ke-31: Siapa Pemain Paling Menonjol?",371,221629,672902,13415],["2026-09-27","ZAgOV2URKOJ","Sejarah Rivalitas Dewa United dan Liverpool yang Jarang Dibahas",459,209752,585472,18603],["2026-09-28","2xckZlfiove","Real Madrid vs Arema FC: 3 Momen Panas yang Bikin Stadion Bergemuruh",640,144484,515946,19582],["2026-09-29","Q9WeSOlbl8P","Evaluasi Persija Pekan ke-14: Siapa Pemain Paling Menonjol?",470,176979,495680,14459],["2026-09-30","2sFWVnUll2A","Evaluasi Bali United Pekan ke-22: Siapa Pemain Paling Menonjol?",588,215981,1011821,16995],["2026-10-01","dDzBRMBS7hb","Sejarah Rivalitas Manchester City dan Juventus yang Jarang Dibahas",746,83180,515260,17207],["2026-10-02","Z8wqMrEvymq","Bali United vs Real Madrid: 4 Momen Panas yang Bikin Stadion Bergemuruh",778,178523,863415,14834],["2026-10-03","wpLvMQjjvSS","Perebutan Papan Atas: Bayern Munchen atau Inter Milan, Siapa Lebih Konsisten?",846,79813,372463,15476],["2026-10-04","YN-ARbXVy3T","Highlight PSM Makassar vs Persebaya: Drama 6 Gol dan Kartu Merah",834,88728,497428,13572],["2026-10-05","wwpHwLlQgyO","Sejarah Rivalitas Persib dan Manchester City yang Jarang Dibahas",961,112819,852006,13018],["2026-10-06","uB_-l8ysDj8","Perebutan Papan Atas: Liverpool atau Persebaya, Siapa Lebih Konsisten?",573,143190,652630,12994],["2026-10-07","EPYzosbdsN7","Kilas Balik Liverpool vs Arema FC: Laga Dramatis yang Masih Dikenang Suporter",635,53255,237898,15800],["2026-10-08","0W5W-2gzlof","Evaluasi Liverpool Pekan ke-11: Siapa Pemain Paling Menonjol?",992,210443,1961880,11784],["2026-10-09","HBRdcGZ1m_k","Perebutan Papan Atas: Persis Solo atau Borneo FC, Siapa Lebih Konsisten?",377,217266,750791,11603],["2026-10-10","zPGgUpwHKIP","Jelang Dewa United vs Persija: Prediksi Susunan Pemain dan Skor Akhir",830,85976,647056,14920],["2026-10-11","Yhfrn2C0Dy_","Sejarah Rivalitas Inter Milan dan Juventus yang Jarang Dibahas",563,180799,589023,21072],["2026-10-12","HGQ6O-NEO9J","Peluang Juventus Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",771,140803,687589,13666],["2026-10-13","OdoxJQb2-Bm","Kilas Balik Bali United vs Garuda Muda: Laga Dramatis yang Masih Dikenang Suporter",411,163052,433528,8471],["2026-10-14","naYkUGQ_FJp","Sejarah Rivalitas Arema FC dan Inter Milan yang Jarang Dibahas",683,183568,894285,14380],["2026-10-15","dIgrB5zK4-n","Evaluasi Manchester City Pekan ke-2: Siapa Pemain Paling Menonjol?",793,87073,637567,14034],["2026-10-16","4av5R2gFHK-","Sejarah Rivalitas Barcelona dan Dewa United yang Jarang Dibahas",951,65809,588675,13521],["2026-10-17","E7Z_ElIj-9H","Highlight Persija vs Arsenal: Drama 6 Gol dan Kartu Merah",641,214299,762969,9830],["2026-10-19","_3g47h3_nwQ","Kilas Balik Persija vs Persebaya: Laga Dramatis yang Masih Dikenang Suporter",375,146851,355798,14844],["2026-10-20","ihwUwWKBVHY","Evaluasi Bali United Pekan ke-31: Siapa Pemain Paling Menonjol?",529,72038,293902,15244],["2026-10-21","uphw48rhGHM","Evaluasi Persis Solo Pekan ke-30: Siapa Pemain Paling Menonjol?",773,209756,1077698,11447],["2026-10-22","ScpgrmHjxI3","Jelang Persik Kediri vs Juventus: Prediksi Susunan Pemain dan Skor Akhir",518,131689,657216,13860],["2026-10-23","ch-OrmPA3jL","Evaluasi Bayern Munchen Pekan ke-31: Siapa Pemain Paling Menonjol?",491,179230,675493,12024],["2026-10-24","Nht5SdlWnQ2","Kilas Balik Bali United vs Manchester City: Laga Dramatis yang Masih Dikenang Suporter",1038,218769,1678525,15887],["2026-10-25","e1ueAVZO436","Sejarah Rivalitas Persis Solo dan Liverpool yang Jarang Dibahas",703,142519,752195,11974],["2026-10-26","KdRU5m6EVK_","Evaluasi Persik Kediri Pekan ke-13: Siapa Pemain Paling Menonjol?",913,186386,1090934,9983],["2026-10-27","dDDbfBxaHTR","Perebutan Papan Atas: Arema FC atau Persis Solo, Siapa Lebih Konsisten?",912,154489,1044723,10614],["2026-10-28","J04GqoqMFHl","Sejarah Rivalitas Bali United dan PSIS Semarang yang Jarang Dibahas",879,165599,1020423,16947],["2026-10-29","GhrQHLD36fB","Kilas Balik Arema FC vs Persik Kediri: Laga Dramatis yang Masih Dikenang Suporter",1051,102374,887361,14758],["2026-10-30","VpthMlm8fDT","Manchester City vs Persis Solo: 10 Momen Panas yang Bikin Stadion Bergemuruh",488,78175,212132,11588],["2026-10-31","YRZATF4djIV","Jelang Barcelona vs PSIS Semarang: Prediksi Susunan Pemain dan Skor Akhir",526,79729,396594,15126],["2026-11-01","gjeZGc3XapC","Perebutan Papan Atas: PSIS Semarang atau Arsenal, Siapa Lebih Konsisten?",655,88381,483597,15388],["2026-11-02","ootRSfWIZj9","Persik Kediri vs Inter Milan: 7 Momen Panas yang Bikin Stadion Bergemuruh",534,68743,279159,11785],["2026-11-03","C5YLqNQK5jM","Evaluasi Persik Kediri Pekan ke-22: Siapa Pemain Paling Menonjol?",759,106453,757069,13581],["2026-11-04","sFNMz90Xghm","Peluang Juventus Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",576,111550,576670,14747],["2026-11-05","1hdRWsyBZnl","Highlight Barcelona vs PSM Makassar: Drama 10 Gol dan Kartu Merah",661,220141,1253625,13191],["2026-11-06","_kwygekIaij","Real Madrid vs Garuda Muda: 8 Momen Panas yang Bikin Stadion Bergemuruh",430,218138,517591,16394],["2026-11-07","0dwCKBP6xGu","Highlight Persis Solo vs Bayern Munchen: Drama 8 Gol dan Kartu Merah",889,210656,1278385,17265],["2026-11-08","8CAUKJ9hNvg","Persik Kediri vs Garuda Muda: 6 Momen Panas yang Bikin Stadion Bergemuruh",961,82386,633498,9257],["2026-11-09","gfckZqLtWoo","Peluang Manchester City Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",700,190664,923935,18252],["2026-11-10","UZKqrGVjafD","Kilas Balik Bayern Munchen vs Liverpool: Laga Dramatis yang Masih Dikenang Suporter",791,68613,301459,14769],["2026-11-11","2eGVXg5trXM","Jelang Arema FC vs Bayern Munchen: Prediksi Susunan Pemain dan Skor Akhir",635,98402,560770,17684],["2026-11-12","l53yJBmunKG","Peluang Garuda Muda Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",683,46769,178503,12249],["2026-11-13","_PJqx706-zL","Highlight Persib vs Borneo FC: Drama 8 Gol dan Kartu Merah",812,179546,1249414,14925],["2026-11-14","g93yQdlQ-dS","Peluang Juventus Juara Musim Ini: Hitung-hitungan Sisa Pertandingan",504,168648,705738,14466],["2026-11-15","bgY4qbwjxzm","Sejarah Rivalitas Liverpool dan Persija yang Jarang Dibahas",508,183843,833378,11627],["2026-11-16","nd19UT1fJGQ","PSIS Semarang vs Persis Solo: 6 Momen Panas yang Bikin Stadion Bergemuruh",618,66701,258368,17375]];
+const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const MSHORT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const ROLE = {manager:'Manajer Media Digital', tim:'Pengelola Konten/Tim Produksi'};
+const USERS = {manager:{pw:'12345',role:'manager'}, tim:{pw:'12345',role:'tim'}};
+const KEY = 'dss-cetakgol-idn-v5', TKEY='dss-cetakgol-theme';
+const H_LENGKAP = 7; // data masuk laporan setelah H+7 dari tanggal upload
+const DEF_FORM = {date:'',vid:'',title:'',dm:'',ds:'',views:'',wt:'',rpm:''};
+const DEF_SET = {biayaDetik:2000, catatan:'Target default sesuai sistem evaluasi', rateTarget:90, revTarget:65000000, growth:10};
+
+const IC = {
+  dashboard:'<rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/>',
+  input:'<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/>',
+  evaluasi:'<path d="M9 11l3 3 8-8"/><path d="M20 12v6a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h8"/>',
+  laporan:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8"/>',
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeoff:'<path d="M3 3l18 18M10.6 6.1A10 10 0 0112 6c6.4 0 10 6 10 6a17 17 0 01-3.2 3.9M6.6 7.7C3.9 9.5 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1M9.9 9.9a3 3 0 004.2 4.2"/>',
+  theme:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/>',
+  copy:'<rect x="9" y="9" width="11" height="11" rx="3"/><path d="M5 15V6a2 2 0 012-2h9"/>',
+  print:'<path d="M7 9V3h10v6M7 17H5a2 2 0 01-2-2v-4a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2h-2"/><rect x="7" y="14" width="10" height="7" rx="1"/>',
+  up:'<path d="M12 19V5M6 11l6-6 6 6"/>', down:'<path d="M12 5v14M6 13l6 6 6-6"/>'
+};
+const ic = k => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+
+const S = {
+  user:null, page:'dashboard', videos:[], nextId:1, set:{...DEF_SET},
+  ui:{dType:'bulanan', dPer:'2026-03', metric:'rate', ePer:'2026-03', eq:'', ef:'all', es:'id', ed:'asc', iq:'', rYear:'2026', rMonth:'2026-01', show:15, confirmAll:false, pw:false, imp:false},
+  form:{...DEF_FORM}, errs:[], loginErr:'', loginF:{u:'',p:''}, copy:'', impTxt:'', impMsg:'', theme:'auto'
+};
+
+/* Biaya produksi = durasi video (detik) × tarif per detik, tanpa biaya pokok */
+const costOf = dur => Math.round(dur*S.set.biayaDetik);
+function seedVideos(){ S.videos = SEED.map((r,i)=>({id:i+1,date:r[0],per:r[0].slice(0,7),vid:r[1],title:r[2],dur:r[3],views:r[4],wt:r[5],rpm:r[6],cost:costOf(r[3])})); S.nextId = S.videos.length+1; }
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const o = JSON.parse(raw);
+      if(o && Array.isArray(o.videos) && o.set && typeof o.set.biayaDetik==='number'){ S.videos=o.videos; S.nextId=o.nextId||o.videos.length+1; S.set={...DEF_SET,...o.set}; }
+      else seedVideos();
+    } else seedVideos();
+    const t=localStorage.getItem(TKEY); if(t==='light'||t==='dark') S.theme=t;
+  }catch(e){ if(!S.videos.length) seedVideos(); }
+  applyTheme();
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({videos:S.videos,nextId:S.nextId,set:S.set})); }catch(e){} }
+function applyTheme(){ const r=document.documentElement; if(S.theme==='auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme',S.theme); }
+function cycleTheme(){ S.theme = S.theme==='auto'?'light':S.theme==='light'?'dark':'auto'; applyTheme(); try{ S.theme==='auto'?localStorage.removeItem(TKEY):localStorage.setItem(TKEY,S.theme); }catch(e){} render(); }
+const themeBtn = cls => `<button class="btn soft sm ${cls||''}" data-act="theme" aria-label="Ganti tema">${ic('theme')}Tema: ${S.theme==='auto'?'Otomatis':S.theme==='light'?'Terang':'Gelap'}</button>`;
+
+/* ---------- helpers ---------- */
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const rp = n => (n<0?'-':'')+'Rp'+fmt(Math.abs(n));
+const pct = r => r==null ? '–' : (Math.round(r*10)/10)+'%';
+const jt = n => n>=1e9 ? (n/1e9).toFixed(2).replace('.',',')+' M' : (n/1e6).toFixed(n>=1e8?0:1).replace('.',',')+' jt';
+const perLabel = p => { const [y,m]=p.split('-'); return MONTHS[+m-1]+' '+y; };
+const dataUntil = () => { if(!S.videos.length) return '–'; const d=S.videos.reduce((a,v)=>v.date>a?v.date:a,''); const [y,m,dd]=d.split('-'); return +dd+' '+MONTHS[+m-1]+' '+y; };
+const yLabel = y => { const ms=months().filter(m=>yOf(m)===y); return ms.length&&ms.length<12 ? ' ('+MSHORT[+ms[0].split('-')[1]-1]+'–'+MSHORT[+ms[ms.length-1].split('-')[1]-1]+')' : ''; };
+const qOf = p => Math.floor((+p.split('-')[1]-1)/3)+1;
+const yOf = p => p.split('-')[0];
+
+const todayStr = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const dayDiff = (a,b) => Math.round((Date.UTC(...b.split('-').map((x,i)=>i===1?x-1:+x)) - Date.UTC(...a.split('-').map((x,i)=>i===1?x-1:+x)))/864e5);
+const tgl = d => { if(!d) return '–'; const [y,m,dd]=d.split('-'); return +dd+' '+MSHORT[+m-1]+' '+y; };
+const durTxt = s => Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+/* Data dianggap lengkap jika sudah H+7 sejak tanggal upload */
+const isMature = v => dayDiff(v.date, todayStr()) >= H_LENGKAP;
+const readyOn = v => { const [y,m,d]=v.date.split('-').map(Number); const t=new Date(y,m-1,d+H_LENGKAP); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); };
+function calc(v){
+  const rev = Math.round(v.views*v.rpm/1000);
+  const bep = rev>=v.cost;
+  // Watch target: views minimum agar pendapatan menutup biaya produksi (biaya mengikuti durasi)
+  const tViews = Math.ceil(v.cost/v.rpm*1000);
+  return {rev, bep, wt:bep, tViews, ok:bep, gap:rev-v.cost, mature:isMature(v)};
+}
+function stat(list){
+  let ok=0, rev=0, cost=0, views=0, n=0, pend=0;
+  for(const v of list){ const c=calc(v); if(!c.mature){ pend++; continue; } n++; if(c.ok) ok++; rev+=c.rev; cost+=v.cost; views+=v.views; }
+  return {total:n, ok, bad:n-ok, pend, rate:n?ok/n*100:null, rev, cost, views};
+}
+const inMonth = p => S.videos.filter(v=>v.per===p);
+const inQuarter = (y,q) => S.videos.filter(v=>yOf(v.per)===y && qOf(v.per)===q);
+const inYear = y => S.videos.filter(v=>yOf(v.per)===y);
+const months = () => [...new Set(S.videos.map(v=>v.per))].sort();
+const years = () => [...new Set(S.videos.map(v=>yOf(v.per)))].sort();
+const quarters = () => [...new Set(S.videos.map(v=>yOf(v.per)+'-Q'+qOf(v.per)))].sort();
+const qLabel = k => { const [y,q]=k.split('-Q'); return 'Triwulan '+q+' '+y; };
+
+function ensureUi(){
+  const ms=months(), ys=years(), qs=quarters();
+  if(!ms.includes(S.ui.ePer)) S.ui.ePer = ms.includes('2026-03') ? '2026-03' : (ms[ms.length-1]||'');
+  if(!ys.includes(S.ui.rYear)) S.ui.rYear = ys[0]||'';
+  const rm = ms.filter(m=>yOf(m)===S.ui.rYear);
+  if(!rm.includes(S.ui.rMonth)) S.ui.rMonth = rm[0]||'';
+  const opts = S.ui.dType==='bulanan'?ms : S.ui.dType==='triwulan'?qs : ys;
+  if(!opts.includes(S.ui.dPer)) S.ui.dPer = (S.ui.dType==='bulanan' && ms.includes('2026-03')) ? '2026-03' : (opts[0]||'');
+}
+function switchType(t){
+  const old=S.ui.dPer; let y='2026', m=1;
+  if(/^\d{4}-\d{2}$/.test(old)){ y=yOf(old); m=+old.split('-')[1]; }
+  else if(/-Q\d$/.test(old)){ y=old.split('-Q')[0]; m=(+old.split('-Q')[1]-1)*3+1; }
+  else if(/^\d{4}$/.test(old)){ y=old; }
+  S.ui.dType=t;
+  S.ui.dPer = t==='bulanan' ? y+'-'+String(m).padStart(2,'0') : t==='triwulan' ? y+'-Q'+(Math.floor((m-1)/3)+1) : y;
+}
+function dashList(){
+  const p=S.ui.dPer, t=S.ui.dType;
+  if(t==='bulanan') return inMonth(p);
+  if(t==='triwulan'){ const [y,q]=p.split('-Q'); return inQuarter(y,+q); }
+  return inYear(p);
+}
+function prevOf(t,p){
+  if(t==='bulanan'){ const [y,m]=p.split('-').map(Number); const d=new Date(y,m-2,1); const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); return {list:inMonth(k),label:perLabel(k)}; }
+  if(t==='triwulan'){ let [y,q]=p.split('-Q').map(Number); q--; if(q<1){q=4;y--;} return {list:inQuarter(String(y),q),label:'Triwulan '+q+' '+y}; }
+  const y=String(+p-1); return {list:inYear(y),label:y};
+}
+const scaleOf = t => t==='bulanan'?1:t==='triwulan'?3:12;
+function deltaPts(cur,prev,label){
+  if(cur==null||prev==null) return '';
+  const d=Math.round((cur-prev)*10)/10;
+  const cls=d>0?'up':d<0?'down':'flat';
+  return `<span class="delta ${cls}" title="Dibanding ${esc(label)}">${d>0?'▲ ':d<0?'▼ ':''}${Math.abs(d)} poin</span>`;
+}
+function deltaPct(cur,prev,label){
+  if(!prev) return '';
+  const d=Math.round((cur-prev)/prev*1000)/10;
+  const cls=d>0?'up':d<0?'down':'flat';
+  return `<span class="delta ${cls}" title="Dibanding ${esc(label)}">${d>0?'▲ ':d<0?'▼ ':''}${Math.abs(d)}%</span>`;
+}
+
+/* ---------- login ---------- */
+function loginView(){
+  const f=S.loginF;
+  return `${themeBtn('themebtn')}<div class="login-wrap"><form class="login glass" id="loginForm" autocomplete="off">
+    <div class="badge">DSS</div>
+    <h1>Sistem Evaluasi Kinerja Video</h1>
+    <p class="sub">Decision Support System untuk pemantauan kinerja video Channel Cetakgol IDN.</p>
+    <label for="lu">Username</label>
+    <input class="in" id="lu" data-l="u" value="${esc(f.u)}" autocomplete="off">
+    <label for="lp">Password</label>
+    <div class="pw"><input class="in" id="lp" data-l="p" type="${S.ui.pw?'text':'password'}" value="${esc(f.p)}" autocomplete="off">
+      <button type="button" class="eye" data-act="eye" aria-label="${S.ui.pw?'Sembunyikan':'Tampilkan'} password">${ic(S.ui.pw?'eyeoff':'eye')}</button></div>
+    ${S.loginErr?`<div class="err" role="alert">${esc(S.loginErr)}</div>`:''}
+    <button class="btn block" type="submit">Login</button>
+  </form></div>`;
+}
+
+function navItems(){
+  const n=[['dashboard','Dashboard'],['input','Input Data Video'],['evaluasi','Evaluasi Video']];
+  if(S.user==='manager'){ n.push(['laporan','Laporan DSS']); n.push(['target','Pengaturan Target']); }
+  return n;
+}
+const TITLES={dashboard:'Dashboard',input:'Input Data Video',evaluasi:'Evaluasi Kinerja Video',laporan:'Laporan DSS',target:'Pengaturan Target'};
+
+function shell(body){
+  return `<div class="shell">
+  <aside class="side glass"><div class="brand"><div class="badge">DSS</div><div><b>DSS Evaluasi Video</b><small>Cetakgol IDN</small></div></div>
+    <nav class="nav" aria-label="Menu utama">${navItems().map(([k,l])=>`<button data-act="nav" data-p="${k}"${S.page===k?' aria-current="page"':''}>${ic(k)}${l}</button>`).join('')}</nav>
+    <div class="sidefoot">${themeBtn()}<button class="btn soft" data-act="logout">Keluar</button></div></aside>
+  <main class="main"><header class="top"><h1>${TITLES[S.page]}</h1><div class="row"><div class="who glass">Data per <b>${dataUntil()}</b></div><div class="who glass">Login sebagai: <b>${ROLE[S.user]}</b></div></div></header>${body}</main></div>`;
+}
+function opt(v,l,sel){ return `<option value="${esc(v)}"${v===sel?' selected':''}>${esc(l)}</option>`; }
+const chip = ok => `<span class="chip ${ok?'ok':'bad'}">${ok?'Berhasil':'Tidak Berhasil'}</span>`;
+const waitChip = v => `<span class="chip wait" title="Data lengkap mulai ${tgl(readyOn(v))}">Menunggu Data (H+7)</span>`;
+const stChip = (v,c) => c.mature ? chip(c.ok) : waitChip(v);
+
+/* ---------- dashboard ---------- */
+function dashboard(){
+  const list=dashList(), st=stat(list), t=S.ui.dType, p=S.ui.dPer;
+  const ms=months(), qs=quarters(), ys=years();
+  const prev=prevOf(t,p), ps=stat(prev.list), hasPrev=prev.list.length>0;
+  const popts = t==='bulanan'? ms.map(m=>opt(m,perLabel(m),p)) : t==='triwulan'? qs.map(q=>opt(q,qLabel(q),p)) : ys.map(y=>opt(y,y,p));
+  const latest = [...list].sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.id-a.id).slice(0,5);
+  const kp=(l,v,s,d='')=>`<div class="card kpi glass"><div class="l">${l}</div><div class="v num">${v}${d}</div><div class="s">${s}</div></div>`;
+  const sc=scaleOf(t), revT=S.set.revTarget*sc, rateT=S.set.rateTarget;
+  const rp1=st.rate==null?0:st.rate/rateT*100, rp2=st.rev/revT*100;
+  const bar=(label,val,tgt,p2,fmtv)=>`<div class="tgt"><div class="pl"><span>${label}</span><span><b class="num">${fmtv(val)}</b> dari target ${fmtv(tgt)}</span></div><div class="prog${p2>=100?' good':''}"><i style="width:${Math.max(0,Math.min(100,p2))}%"></i></div><div class="pl"><span>${p2>=100?'Target tercapai':'Kurang '+(val==null?'':t_gap(label,val,tgt,fmtv))}</span><b class="num">${Math.round(p2)}%</b></div></div>`;
+  return `<section class="kpis">
+    ${kp('Total Video',st.total,st.pend?st.pend+' video lain menunggu data lengkap (H+7)':'Data lengkap (H+7)')}
+    ${kp('Video Berhasil',st.ok,'Pendapatan ≥ biaya produksi')}
+    ${kp('Video Tidak Berhasil',st.bad,'Pendapatan < biaya produksi')}
+    ${kp('Tingkat Keberhasilan',pct(st.rate),'Video berhasil / total video',hasPrev?deltaPts(st.rate,ps.rate,prev.label):'')}
+    ${kp('Estimasi Pendapatan',rp(st.rev),'Berdasarkan Views × RPM',hasPrev?deltaPct(st.rev,ps.rev,prev.label):'')}
+  </section>
+  <div class="cols">
+    <section class="card glass"><div class="head"><h2>Ringkasan Kinerja</h2><div class="row">
+      <select class="sel" id="dType" data-sel="dType" aria-label="Jenis periode">${opt('bulanan','Bulanan',t)}${opt('triwulan','Triwulan',t)}${opt('tahunan','Tahunan',t)}</select>
+      <select class="sel" id="dPer" data-sel="dPer" aria-label="Periode">${popts.join('')}</select></div></div>
+      <div class="seg" role="group" aria-label="Metrik grafik"><button data-act="metric" data-m="rate" aria-pressed="${S.ui.metric==='rate'}">Tingkat Keberhasilan</button><button data-act="metric" data-m="rev" aria-pressed="${S.ui.metric==='rev'}">Pendapatan</button></div>
+      ${chart()}
+      <p class="cnote">Video berhasil jika pendapatan menutup biaya produksi (biaya mengikuti durasi video). Hanya video yang sudah H+7 yang dihitung. Garis putus-putus menunjukkan target.</p>
+    </section>
+    <section class="card glass"><div class="head"><h2>Video Terbaru</h2><button class="btn soft sm" data-act="nav" data-p="input">Tambah Data</button></div>
+      ${latest.length?`<div class="tw"><table><thead><tr><th>Video</th><th>Pendapatan</th><th>Status</th></tr></thead><tbody>${latest.map(v=>{const c=calc(v);return `<tr><td>${tgl(v.date)}<div class="sub">${esc(v.title||'')}</div></td><td class="num">${rp(c.rev)}</td><td>${stChip(v,c)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">Belum ada video pada periode ini.</div>'}
+    </section>
+  </div>
+  <div class="cols" style="grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)">
+    <section class="card glass"><div class="head"><h2>Capaian Target</h2>${S.user==='manager'?'<button class="btn soft sm" data-act="nav" data-p="target">Atur</button>':''}</div>
+      ${list.length?`${bar('Tingkat keberhasilan',st.rate,rateT,rp1,v=>pct(v))}${bar('Pendapatan',st.rev,revT,rp2,v=>rp(v))}`:'<div class="empty">Belum ada data pada periode ini.</div>'}
+    </section>
+    <section class="card glass"><div class="head"><h2>Wawasan Otomatis</h2><span class="note">Dihitung dari data periode terpilih</span></div>
+      <ul class="ins">${insights(list,st,prev,ps,hasPrev).map(i=>`<li class="${i[0]}"><span>${i[1]}</span></li>`).join('')}</ul>
+    </section>
+  </div>`;
+}
+function t_gap(label,val,tgt,fmtv){ return label==='Pendapatan' ? rp(Math.max(0,tgt-val)) : (Math.round(Math.max(0,tgt-val)*10)/10)+' poin'; }
+
+function insights(list,st,prev,ps,hasPrev){
+  if(!list.length) return [['','Belum ada data pada periode ini.']];
+  const out=[], rateT=S.set.rateTarget;
+  if(hasPrev && st.rate!=null && ps.rate!=null){
+    const d=Math.round((st.rate-ps.rate)*10)/10;
+    out.push([d>0?'good':d<0?'warn':'', d===0?`Tingkat keberhasilan sama dengan ${esc(prev.label)} (<b>${pct(st.rate)}</b>).`:`Tingkat keberhasilan <b>${d>0?'naik':'turun'} ${Math.abs(d)} poin</b> dibanding ${esc(prev.label)} (${pct(ps.rate)} menjadi ${pct(st.rate)}).`]);
+  }
+  out.push([st.rate>=rateT?'good':'warn', st.rate>=rateT?`Tingkat keberhasilan sudah di atas target ${rateT}%.`:`Tingkat keberhasilan masih <b>${Math.round((rateT-st.rate)*10)/10} poin</b> di bawah target ${rateT}%.`]);
+  const byRev=list.map(v=>({v,c:calc(v)})).filter(x=>x.c.mature).sort((a,b)=>b.c.rev-a.c.rev);
+  if(!byRev.length) return [['warn',`Semua ${list.length} video pada periode ini masih menunggu data lengkap (H+7).`]];
+  const top=byRev[0], low=byRev[byRev.length-1];
+  out.push(['',`Pendapatan tertinggi: <b>${tgl(top.v.date)}</b> “${esc(top.v.title||'')}” (${rp(top.c.rev)}). Terendah: <b>${tgl(low.v.date)}</b> “${esc(low.v.title||'')}” (${rp(low.c.rev)}).`]);
+  if(st.pend) out.push(['warn',`<b>${st.pend} video</b> belum H+7 sehingga belum dihitung; statusnya menunggu data lengkap.`]);
+  out.push(['',`Rata-rata <b>${fmt(st.views/st.total)} views</b> dan <b>${rp(st.rev/st.total)}</b> per video.`]);
+  const net=st.rev-st.cost;
+  out.push([net>=0?'good':'warn',`Periode ini mencatat <b>${net>=0?'surplus':'defisit'} ${rp(Math.abs(net))}</b> (pendapatan ${Math.round(st.rev/st.cost*100)}% dari total biaya produksi).`]);
+  const near=list.filter(v=>{const c=calc(v);return c.mature && !c.ok && c.rev>=0.8*v.cost;});
+  if(st.bad) out.push(['warn',near.length?`<b>${near.length} dari ${st.bad}</b> video tidak berhasil sudah menutup minimal 80% biaya produksi, jadi layak dioptimalkan lebih dulu.`:`Semua ${st.bad} video tidak berhasil masih di bawah 80% biaya produksi.`]);
+  if(S.ui.dType==='bulanan'){
+    const y=yOf(S.ui.dPer), rows=months().filter(m=>yOf(m)===y).map(m=>({m,r:stat(inMonth(m)).rate})).filter(x=>x.r!=null);
+    if(rows.length>1){ const w=rows.reduce((a,b)=>b.r<a.r?b:a); out.push(['warn',`Bulan terlemah tahun ${y}: <b>${perLabel(w.m)}</b> (${pct(w.r)}).`]); }
+  }
+  return out;
+}
+
+function chart(){
+  const t=S.ui.dType, p=S.ui.dPer, rate=S.ui.metric==='rate'; let pts=[], sel=-1;
+  const val=l2=>{ if(!l2.length) return null; const s=stat(l2); return rate?s.rate:s.rev; };
+  if(t==='bulanan'){
+    const y=yOf(p); pts=MSHORT.map((l,i)=>{const m=y+'-'+String(i+1).padStart(2,'0'); return {l,full:MONTHS[i]+' '+y,v:val(inMonth(m))}});
+    sel=+p.split('-')[1]-1;
+  } else if(t==='triwulan'){
+    const [y,q]=p.split('-Q'); pts=[1,2,3,4].map(i=>({l:'Tw '+i,full:'Triwulan '+i+' '+y,v:val(inQuarter(y,i))})); sel=+q-1;
+  } else {
+    const ys=years(); pts=ys.map(y=>({l:y,full:y,v:val(inYear(y))})); sel=ys.indexOf(p);
+  }
+  if(!pts.length) return '<div class="empty">Belum ada data.</div>';
+  const tgt = rate ? S.set.rateTarget : S.set.revTarget*scaleOf(t);
+  const mx = rate ? 100 : Math.max(...pts.map(d=>d.v||0), tgt)*1.12;
+  const W=600,H=250,L=14,R=62,top=36,base=212,n=pts.length,slot=(W-L-R)/n,bw=Math.min(n===1?70:slot*0.52,36);
+  const f=x=>rate?pct(x):jt(x);
+  let g=`<defs><linearGradient id="gN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--bar-top)"/><stop offset="1" style="stop-color:var(--bar-bot)"/></linearGradient><linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--bar-sel-top)"/><stop offset="1" style="stop-color:var(--bar-sel-bot)"/></linearGradient></defs><line class="axis" x1="${L}" x2="${W-R}" y1="${base}" y2="${base}"/>`;
+  pts.forEach((d,i)=>{
+    const cx=L+slot*i+slot/2;
+    if(d.v!=null){ const h=(base-top)*d.v/mx;
+      g+=`<rect x="${cx-bw/2}" y="${base-h}" width="${bw}" height="${h}" rx="7" fill="url(#${i===sel?'gS':'gN'})"><title>${esc(d.full)}: ${f(d.v)}</title></rect><text class="val" x="${cx}" y="${base-h-6}" text-anchor="middle">${f(d.v)}</text>`;
+    } else g+=`<text x="${cx}" y="${base-6}" text-anchor="middle" font-size="10">–</text>`;
+    g+=`<text x="${cx}" y="${base+17}" text-anchor="middle" font-size="10.5">${esc(d.l)}</text>`;
+  });
+  const ty=base-(base-top)*tgt/mx;
+  g+=`<line class="tl" x1="${L}" x2="${W-R}" y1="${ty}" y2="${ty}"/><text class="tt" x="${W-R+6}" y="${ty-1}">Target</text><text class="tt" x="${W-R+6}" y="${ty+11}">${f(tgt)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${rate?'Tingkat keberhasilan':'Pendapatan'} per periode">${g}</svg>`;
+}
+
+/* ---------- input ---------- */
+const formDur = f => (Number(f.dm)||0)*60 + (Number(f.ds)||0);
+function previewHtml(){
+  const f=S.form, v=+f.views, r=+f.rpm, d=formDur(f);
+  const c = d>0 ? costOf(d) : 0;
+  const costTxt = d>0 ? `Biaya produksi (otomatis): <b class="num">${rp(c)}</b> <span class="mono">= ${fmt(d)} detik × ${rp(S.set.biayaDetik)}</span>` : 'Biaya produksi dihitung otomatis setelah durasi diisi.';
+  if(!(v>0&&r>0&&d>0)) return costTxt+'<span>Pratinjau pendapatan muncul setelah durasi, views, dan RPM terisi.</span>';
+  const o=calc({views:v,rpm:r,cost:c,date:f.date||todayStr()});
+  return `${costTxt} <span>Pendapatan <b class="num">${rp(o.rev)}</b></span> <span>Watch target: <b class="num">${fmt(o.tViews)} views</b> (${o.wt?'Berhasil':'Belum'})</span> <span>${o.gap>=0?'Surplus':'Defisit'}: <b class="${o.gap>=0?'pos':'neg'} num">${rp(Math.abs(o.gap))}</b></span> ${f.date&&!o.mature?waitChip({date:f.date}):chip(o.ok)}`;
+}
+function savedTable(){
+  const q=S.ui.iq.trim().toLowerCase();
+  let list=[...S.videos].sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:b.id-a.id);
+  if(q) list=list.filter(v=>(v.date+' '+tgl(v.date)+' '+(v.vid||'')+' '+(v.title||'')+' '+perLabel(v.per)).toLowerCase().includes(q));
+  const shown=list.slice(0,S.ui.show);
+  if(!S.videos.length) return `<div class="empty">Belum ada data video. Isi formulir di atas, atau <button class="btn soft sm" data-act="restore">Pulihkan data contoh</button></div>`;
+  if(!list.length) return `<div class="empty">Tidak ada data yang cocok dengan pencarian.</div>`;
+  const rows=shown.map(v=>{const c=calc(v);return `<tr><td>${tgl(v.date)}</td><td class="mono">${esc(v.vid||'–')}</td><td class="wrap">${esc(v.title||'–')}</td><td class="r num">${durTxt(v.dur)}</td><td>${perLabel(v.per)}</td><td class="r num">${fmt(v.views)}</td><td class="r num">${fmt(v.wt)}</td><td class="r num">${rp(v.rpm)}</td><td class="r num">${rp(v.cost)}</td><td class="r num">${rp(c.rev)}</td><td>${stChip(v,c)}</td></tr>`}).join('');
+  return `<div class="tw"><table><thead><tr><th>Tanggal Upload</th><th>Video ID</th><th>Judul Video</th><th class="r">Durasi</th><th>Periode</th><th class="r">Views</th><th class="r">Watch Time (menit)</th><th class="r">RPM</th><th class="r">Biaya Produksi</th><th class="r">Pendapatan</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+  ${list.length>shown.length?`<div style="margin-top:12px"><button class="btn soft sm" data-act="more">Tampilkan lebih banyak (${list.length-shown.length} lagi)</button></div>`:''}`;
+}
+function inputPage(){
+  const f=S.form;
+  const inp=(id,l,k,type,ph,extra='')=>`<div><label for="${id}">${l}</label><input class="in" id="${id}" data-f="${k}" type="${type}" placeholder="${ph}" value="${esc(f[k])}" ${extra}></div>`;
+  return `<section class="card glass"><div class="head"><h2>Input Data Video</h2><span class="note">Data yang sudah disimpan tidak dapat diubah atau dihapus</span></div>
+    <div class="banner">Masukkan tanggal upload, Video ID, judul, durasi, views, watch time, dan RPM. Periode diambil dari tanggal upload, biaya produksi dihitung dari durasi, lalu pendapatan dan status dihitung otomatis. Video baru masuk laporan setelah H+7 dari tanggal upload.</div>
+    <form id="vidForm" class="form" novalidate>
+      ${inp('fDate','Tanggal Upload','date','date','',`max="${todayStr()}"`)}
+      ${inp('fVid','Video ID (YouTube)','vid','text','Contoh: dQw4w9WgXcQ','maxlength="20" autocapitalize="off" spellcheck="false"')}
+      <div><label for="fDm">Durasi Video (menit : detik)</label><div class="row" style="flex-wrap:nowrap"><input class="in" id="fDm" data-f="dm" type="number" min="0" placeholder="12" value="${esc(f.dm)}" inputmode="numeric" aria-label="Durasi menit"><span>:</span><input class="in" id="fDs" data-f="ds" type="number" min="0" max="59" placeholder="30" value="${esc(f.ds)}" inputmode="numeric" aria-label="Durasi detik"></div></div>
+      <div class="span3">${inp('fTitle','Judul Video','title','text','Contoh: Persib vs Persija: 5 Momen Panas yang Bikin Stadion Bergemuruh','maxlength="140"')}</div>
+      ${inp('fViews','Views','views','number','125000','min="1" inputmode="numeric"')}
+      ${inp('fWt','Watch Time (menit)','wt','number','45000','min="0" inputmode="numeric"')}
+      ${inp('fRpm','RPM Channel (Rp / 1.000 Views)','rpm','number','Isi manual, contoh 15000','min="1" inputmode="numeric"')}
+      <div class="preview" id="prev" aria-live="polite">${previewHtml()}</div>
+      <div class="act"><button class="btn" type="submit">Simpan Video</button><button class="btn soft" type="button" data-act="reset">Reset</button>
+        <button class="btn soft" type="button" data-act="imp">${S.ui.imp?'Tutup Impor':'Impor dari Ekspor YouTube'}</button></div>
+    </form>
+    ${S.errs.length?`<div class="err" role="alert">Data belum lengkap atau tidak valid: ${S.errs.join(', ')}. Lengkapi lalu simpan lagi.</div>`:''}
+    ${S.ui.imp?`<div style="margin-top:14px"><label for="impFile">File ekspor YouTube Studio (CSV)</label>
+      <input class="in" id="impFile" type="file" accept=".csv,text/csv,text/plain" style="padding-top:8px">
+      <p class="hint" style="font-size:11px;color:var(--muted);margin-top:4px">Di YouTube Studio buka Analytics → Lanjutan → pilih metrik Durasi, Penayangan, Waktu tonton, dan RPM → Ekspor → CSV, lalu unggah file <i>Data tabel.csv</i> di sini. Kolom dibaca otomatis dari judul kolom (bahasa Indonesia atau Inggris): Konten (Video ID), Judul video, Waktu publikasi video, Durasi (detik), Penayangan, Waktu tonton (jam), RPM. Jika RPM tidak ada, RPM dihitung dari Perkiraan pendapatan ÷ Penayangan × 1.000. Baris Total dan Video ID yang sudah tersimpan dilewati. Biaya produksi dihitung otomatis dari durasi.</p>
+      <label for="impTxt">Atau tempel isi CSV / baris dari Excel/Sheets</label>
+      <textarea class="in" id="impTxt" data-imp="1" placeholder="Konten,Judul video,Waktu publikasi video,Durasi,Penayangan,Waktu tonton (jam),RPM (IDR)&#10;aB3dE5fG7hJ,Judul video bola,10 Nov 2026,750,132000,6875.5,14250">${esc(S.impTxt)}</textarea>
+      <div class="row" style="margin-top:10px"><button class="btn sm" type="button" data-act="doimp">Impor Data</button></div>
+      ${S.impMsg?`<p style="margin-top:10px;font-size:12.5px">${S.impMsg}</p>`:''}</div>`:''}
+  </section>
+  <section class="card glass"><div class="head"><h2>Data Video Tersimpan</h2><div class="row">
+    <input class="in" id="iq" data-q="iq" type="search" placeholder="Cari tanggal, ID, judul, atau bulan" value="${esc(S.ui.iq)}" aria-label="Cari data video" style="height:38px;border-radius:999px;max-width:240px"></div></div>
+    <div id="savedTbl">${savedTable()}</div>
+  </section>`;
+}
+
+/* ---------- evaluasi ---------- */
+function evalData(){
+  const q=S.ui.eq.trim().toLowerCase();
+  let list=inMonth(S.ui.ePer).map(v=>({v,c:calc(v)}));
+  const all=list;
+  if(S.ui.ef==='ok') list=list.filter(x=>x.c.mature&&x.c.ok); else if(S.ui.ef==='bad') list=list.filter(x=>x.c.mature&&!x.c.ok); else if(S.ui.ef==='wait') list=list.filter(x=>!x.c.mature);
+  if(q) list=list.filter(x=>(x.v.date+' '+tgl(x.v.date)+' '+(x.v.vid||'')+' '+(x.v.title||'')).toLowerCase().includes(q));
+  const k=S.ui.es, dir=S.ui.ed==='asc'?1:-1;
+  const key=x=>k==='views'?x.v.views:k==='rev'?x.c.rev:k==='gap'?x.c.gap:k==='dur'?x.v.dur:(+x.v.date.replace(/-/g,''))*1e4+x.v.id;
+  list.sort((a,b)=>(key(a)-key(b))*dir);
+  return {all,list};
+}
+function evalTable(){
+  const {all,list}=evalData(), st=stat(inMonth(S.ui.ePer));
+  const sb=(k,l)=>`<button class="sb" data-act="sort" data-k="${k}" data-on="${S.ui.es===k?1:0}">${l}${S.ui.es===k?(S.ui.ed==='asc'?'↑':'↓'):''}</button>`;
+  const rows=list.map(({v,c})=>`<tr><td><b>${tgl(v.date)}</b></td><td class="mono">${esc(v.vid||'–')}</td><td class="wrap">${esc(v.title||'–')}</td><td class="r num">${durTxt(v.dur)}</td><td class="r num">${fmt(v.views)}</td><td class="r num">${fmt(v.wt)}</td><td class="r num">${rp(c.rev)}</td><td class="r num">${rp(v.cost)}</td><td class="r num ${c.gap>=0?'pos':'neg'}">${c.gap>=0?'Surplus ':'Defisit '}${rp(Math.abs(c.gap))}</td><td><span class="num">${fmt(c.tViews)} views</span><div class="sub ${c.mature?(c.wt?'pos':'neg'):''}">${c.mature?(c.wt?'Berhasil':'Belum'):'Menunggu H+7'}</div></td><td>${stChip(v,c)}</td></tr>`).join('');
+  return `<p class="note" style="font-size:11.5px;color:var(--muted);margin-bottom:10px">${st.total} video lengkap (H+7) · ${st.ok} berhasil · ${st.bad} tidak berhasil${st.pend?' · '+st.pend+' menunggu data lengkap':''} · menampilkan ${list.length}</p>`+
+  (list.length?`<div class="tw"><table><thead><tr><th>${sb('id','Tanggal Upload')}</th><th>Video ID</th><th>Judul Video</th><th class="r">${sb('dur','Durasi')}</th><th class="r">${sb('views','Views')}</th><th class="r">Watch Time</th><th class="r">${sb('rev','Pendapatan')}</th><th class="r">Biaya Produksi</th><th class="r">${sb('gap','Surplus / Defisit')}</th><th>Watch Target</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`
+    :`<div class="empty">${all.length?'Tidak ada video yang cocok dengan filter.':'Belum ada data pada periode ini. Tambahkan lewat menu Input Data Video.'}</div>`);
+}
+function evaluasi(){
+  const ms=months(), p=S.ui.ePer;
+  const fb=(k,l)=>`<button data-act="efilter" data-k="${k}" aria-pressed="${S.ui.ef===k}">${l}</button>`;
+  return `<section class="card glass"><div class="head"><h2>Evaluasi Kinerja Video</h2><select class="sel" id="ePer" data-sel="ePer" aria-label="Periode evaluasi">${ms.map(m=>opt(m,perLabel(m),p)).join('')}</select></div>
+    <div class="tools"><div class="seg" role="group" aria-label="Filter status">${fb('all','Semua')}${fb('ok','Berhasil')}${fb('bad','Tidak Berhasil')}${fb('wait','Menunggu H+7')}</div>
+      <input class="in" id="eq" data-q="eq" type="search" placeholder="Cari tanggal, ID, atau judul" value="${esc(S.ui.eq)}" aria-label="Cari video">
+      <button class="btn soft sm" data-act="copytable">${ic('copy')}Salin Tabel</button></div>
+    <div id="evalTbl">${evalTable()}</div>
+    ${S.copy&&S.page==='evaluasi'?`<textarea class="in copybox" id="copybox" readonly aria-label="Teks tabel">${esc(S.copy)}</textarea>`:''}
+  </section>`;
+}
+
+/* ---------- laporan ---------- */
+function recs(y,m){
+  const q=qOf(m), sq=stat(inQuarter(y,q)), sy=stat(inYear(y)), g=S.set.growth, rt=S.set.rateTarget;
+  let pq, pl; if(q>1){ pq=stat(inQuarter(y,q-1)); pl='Triwulan '+(q-1); } else { pq=stat(inQuarter(String(+y-1),4)); pl='Triwulan 4 '+(+y-1); }
+  let prod;
+  if(pq.total && sq.rate!=null){
+    const d=Math.round((sq.rate-pq.rate)*10)/10;
+    prod = d<0 ? `Tingkat keberhasilan turun ${Math.abs(d)} poin dari ${pl}. Tinjau tema atau format video yang gagal sebelum menambah kapasitas.` : d>0 ? `Tingkat keberhasilan naik ${d} poin dari ${pl}. Pertahankan format yang berhasil dan pertimbangkan menambah slot produksinya.` : `Tingkat keberhasilan stabil dibanding ${pl}. Kapasitas produksi dapat dipertahankan.`;
+  } else prod='Belum ada triwulan pembanding. Kumpulkan data minimal dua triwulan untuk melihat tren.';
+  const nm=months().filter(x=>yOf(x)===y).length, ann=nm?sy.rev/nm*12:0;
+  const sug=Math.round(ann*(1+g/100)/5e6)*5e6;
+  const target = nm ? `Usulan target pendapatan ${+y+1}: <b>${rp(sug)}</b>, dari ${nm<12?'proyeksi 12 bulan':'realisasi '+y} ${rp(ann)} dengan asumsi pertumbuhan ${g}%.` : 'Belum ada data tahun ini.';
+  const tim = sy.rate==null ? 'Belum ada data tahun ini.' : sy.rate>=rt ? `Tingkat keberhasilan tahunan ${pct(sy.rate)} sudah mencapai target ${rt}%. Kinerja tim produksi memenuhi sasaran.` : `Tingkat keberhasilan tahunan ${pct(sy.rate)} masih ${Math.round((rt-sy.rate)*10)/10} poin di bawah target ${rt}%. Perlu evaluasi proses produksi.`;
+  return {prod,target,tim};
+}
+function laporan(){
+  const ys=years(), ms=months().filter(m=>yOf(m)===S.ui.rYear), m=S.ui.rMonth;
+  if(!m) return `<section class="card glass"><div class="empty">Belum ada data untuk dilaporkan. Tambahkan data di menu Input Data Video.</div></section>`;
+  const y=yOf(m), q=qOf(m), sm=stat(inMonth(m)), sq=stat(inQuarter(y,q)), sy=stat(inYear(y)), rc=recs(y,m);
+  const top=(l,v,s)=>`<div class="card kpi glass"><div class="l">${l}</div><div class="v num">${pct(v)}</div><div class="s">${s}</div></div>`;
+  const r=(l,s)=>`<tr><td>${l}</td><td class="r num">${s.total}</td><td class="r num">${s.ok}</td><td class="r num">${pct(s.rate)}</td><td class="r num">${rp(s.rev)}</td><td class="r num">${rp(s.cost)}</td><td class="r num">${sdTxt(s.rev-s.cost)}</td><td class="r num">${s.pend||'–'}</td></tr>`;
+  let prevQ=null;
+  const qrows=[1,2,3,4].map(i=>{ const s=stat(inQuarter(y,i)); const dl=(prevQ&&s.rate!=null&&prevQ.rate!=null)?deltaPts(s.rate,prevQ.rate,'triwulan sebelumnya'):''; if(s.total) prevQ=s;
+    return `<tr><td>Triwulan ${i}</td><td class="r num">${s.total||'–'}</td><td style="min-width:170px"><div class="qbar"><div class="prog${s.rate>=S.set.rateTarget?' good':''}"><i style="width:${s.rate||0}%"></i></div><b class="num">${pct(s.rate)}</b></div></td><td>${dl}</td><td class="r num">${s.total?rp(s.rev):'–'}</td></tr>`}).join('');
+  return `<section class="card glass"><div class="head"><h2>Laporan DSS</h2><div class="row"><button class="btn" data-act="print">${ic('print')}Cetak / Simpan PDF</button><button class="btn soft" data-act="copy">${ic('copy')}Salin Laporan</button></div></div>
+    <div class="banner">Laporan hanya memuat video yang sudah <b>H+7</b> dari tanggal upload (data per ${tgl(todayStr())}). ${sm.pend?`<b>${sm.pend} video</b> pada ${perLabel(m)} masih menunggu data lengkap dan belum dihitung.`:'Semua video pada bulan terpilih sudah lengkap.'}</div>
+    <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">${top('Bulanan',sm.rate,'Periode terpilih')}${top('Triwulan',sq.rate,'Akumulasi 3 bulan')}${top('Tahunan',sy.rate,'Akumulasi tahun')}</div>
+    ${S.copy&&S.page==='laporan'?`<textarea class="in copybox" id="copybox" readonly aria-label="Teks laporan">${esc(S.copy)}</textarea>`:''}</section>
+  <section class="card glass"><div class="head"><h2>Rekap Periodik</h2><div class="row">
+    <select class="sel" id="rYear" data-sel="rYear" aria-label="Tahun">${ys.map(v=>opt(v,v,S.ui.rYear)).join('')}</select>
+    <select class="sel" id="rMonth" data-sel="rMonth" aria-label="Bulan">${ms.map(v=>opt(v,perLabel(v),m)).join('')}</select></div></div>
+    <div class="tw"><table><thead><tr><th>Periode</th><th class="r">Total Video</th><th class="r">Video Berhasil</th><th class="r">Tingkat Keberhasilan</th><th class="r">Estimasi Pendapatan</th><th class="r">Biaya Produksi</th><th class="r">Surplus / Defisit</th><th class="r">Menunggu H+7</th></tr></thead><tbody>
+    ${r('Bulanan',sm)}${r('Triwulan '+q,sq)}${r('Tahunan '+y+yLabel(y),sy)}</tbody></table></div></section>
+  <section class="card glass"><div class="head"><h2>Perbandingan Triwulan ${y}</h2><span class="note">Garis hijau berarti sudah mencapai target ${S.set.rateTarget}%</span></div>
+    <div class="tw"><table><thead><tr><th>Triwulan</th><th class="r">Video</th><th>Tingkat Keberhasilan</th><th>Perubahan</th><th class="r">Pendapatan</th></tr></thead><tbody>${qrows}</tbody></table></div></section>
+  <section class="card glass"><div class="head"><h2>Dasar Keputusan Manajemen</h2><span class="note">Rekomendasi berbasis aturan, bukan prediksi</span></div><div class="dec">
+    <div><h3>Produksi Konten</h3><p>Gunakan tren bulanan dan triwulan untuk menentukan target dan kapasitas produksi.</p><div class="rec"><small>Rekomendasi</small>${rc.prod}</div></div>
+    <div><h3>Target Pendapatan</h3><p>Gunakan laporan tahunan sebagai dasar menetapkan target pendapatan berikutnya.</p><div class="rec"><small>Rekomendasi</small>${rc.target}</div></div>
+    <div><h3>Evaluasi Kinerja Tim</h3><p>Gunakan hasil tahunan untuk mengevaluasi pencapaian tim produksi.</p><div class="rec"><small>Rekomendasi</small>${rc.tim}</div></div></div></section>`;
+}
+const strip = h => h.replace(/<[^>]+>/g,'');
+const sdTxt = n => `<span class="${n>=0?'pos':'neg'}">${n>=0?'Surplus':'Defisit'} ${rp(Math.abs(n))}</span>`;
+function reportText(){
+  const m=S.ui.rMonth; if(!m) return '';
+  const y=yOf(m), q=qOf(m), a=stat(inMonth(m)), b=stat(inQuarter(y,q)), c=stat(inYear(y)), rc=recs(y,m);
+  const L=(n,s)=>`${n}: ${s.total} video lengkap (H+7), ${s.ok} berhasil, tingkat keberhasilan ${pct(s.rate)}, estimasi pendapatan ${rp(s.rev)}, biaya produksi ${rp(s.cost)}, ${s.rev>=s.cost?'surplus':'defisit'} ${rp(Math.abs(s.rev-s.cost))}${s.pend?`, ${s.pend} video menunggu data lengkap`:''}`;
+  return ['Laporan DSS Evaluasi Kinerja Video – Cetakgol IDN',L('Bulanan ('+perLabel(m)+')',a),L('Triwulan '+q+' '+y,b),L('Tahunan '+y+yLabel(y),c),'','Dasar keputusan manajemen:','- Produksi konten: '+strip(rc.prod),'- Target pendapatan: '+strip(rc.target),'- Evaluasi kinerja tim: '+strip(rc.tim)].join('\n');
+}
+
+/* ---------- cetak laporan (PDF) ---------- */
+function printReport(){
+  const m=S.ui.rMonth; if(!m) return;
+  const y=yOf(m), q=qOf(m), sm=stat(inMonth(m)), sq=stat(inQuarter(y,q)), sy=stat(inYear(y)), rc=recs(y,m);
+  const vids=inMonth(m).map(v=>({v,c:calc(v)})).sort((a,b)=>a.v.date<b.v.date?-1:a.v.date>b.v.date?1:a.v.id-b.v.id);
+  const done=vids.filter(x=>x.c.mature), wait=vids.filter(x=>!x.c.mature);
+  const sdP = n => `${n>=0?'Surplus':'Defisit'} ${rp(Math.abs(n))}`;
+  const rr=(l,s)=>`<tr><td>${l}</td><td class="r">${s.total}</td><td class="r">${s.ok}</td><td class="r">${s.bad}</td><td class="r">${pct(s.rate)}</td><td class="r">${rp(s.rev)}</td><td class="r">${rp(s.cost)}</td><td class="r">${sdP(s.rev-s.cost)}</td></tr>`;
+  const qr=[1,2,3,4].map(i=>{const s=stat(inQuarter(y,i)); return `<tr><td>Triwulan ${i}</td><td class="r">${s.total||'–'}</td><td class="r">${s.ok||'–'}</td><td class="r">${pct(s.rate)}</td><td class="r">${s.total?rp(s.rev):'–'}</td><td class="r">${s.total?sdP(s.rev-s.cost):'–'}</td></tr>`}).join('');
+  const vr=done.map(({v,c},i)=>`<tr><td class="r">${i+1}</td><td>${tgl(v.date)}</td><td class="mono">${esc(v.vid)}</td><td>${esc(v.title)}</td><td class="r">${durTxt(v.dur)}</td><td class="r">${fmt(v.views)}</td><td class="r">${rp(v.rpm)}</td><td class="r">${rp(c.rev)}</td><td class="r">${rp(v.cost)}</td><td class="r">${sdP(c.gap)}</td><td>${c.ok?'Berhasil':'Tidak Berhasil'}</td></tr>`).join('');
+  const wr=wait.map(({v})=>`<li>${tgl(v.date)} – ${esc(v.title)} <i>(lengkap mulai ${tgl(readyOn(v))})</i></li>`).join('');
+  const now=new Date(), cetak=now.getDate()+' '+MONTHS[now.getMonth()]+' '+now.getFullYear();
+  let el=document.getElementById('printArea'); if(!el){ el=document.createElement('div'); el.id='printArea'; document.body.appendChild(el); }
+  el.innerHTML=`<header class="ph"><div><h1>Laporan DSS Evaluasi Kinerja Video</h1><p>Channel YouTube Cetakgol IDN</p></div><div class="pm">Periode: <b>${perLabel(m)}</b><br>Dicetak: ${cetak}<br>Oleh: ${ROLE[S.user]}</div></header>
+  <p class="pn">Laporan ini hanya memuat video yang sudah melewati H+7 dari tanggal upload. Video berhasil jika estimasi pendapatan (Views ÷ 1.000 × RPM) menutup biaya produksi. Biaya produksi = durasi video (detik) × ${rp(S.set.biayaDetik)} per detik.</p>
+  <h2>1. Rekap Kinerja</h2>
+  <table><thead><tr><th>Periode</th><th class="r">Video</th><th class="r">Berhasil</th><th class="r">Tidak Berhasil</th><th class="r">Tingkat Keberhasilan</th><th class="r">Pendapatan</th><th class="r">Biaya Produksi</th><th class="r">Surplus / Defisit</th></tr></thead><tbody>
+  ${rr('Bulanan – '+perLabel(m),sm)}${rr('Triwulan '+q+' '+y,sq)}${rr('Tahunan '+y+yLabel(y),sy)}</tbody></table>
+  <h2>2. Perbandingan Triwulan ${y}</h2>
+  <table><thead><tr><th>Triwulan</th><th class="r">Video</th><th class="r">Berhasil</th><th class="r">Tingkat Keberhasilan</th><th class="r">Pendapatan</th><th class="r">Surplus / Defisit</th></tr></thead><tbody>${qr}</tbody></table>
+  <p class="pn">Target tingkat keberhasilan: ${S.set.rateTarget}%. Target pendapatan: ${rp(S.set.revTarget)} per bulan.</p>
+  <h2>3. Dasar Keputusan Manajemen</h2>
+  <ol class="pr"><li><b>Produksi konten.</b> ${strip(rc.prod)}</li><li><b>Target pendapatan.</b> ${strip(rc.target)}</li><li><b>Evaluasi kinerja tim.</b> ${strip(rc.tim)}</li></ol>
+  <h2>4. Rincian Video ${perLabel(m)}</h2>
+  ${done.length?`<table class="small"><thead><tr><th class="r">No</th><th>Tanggal Upload</th><th>Video ID</th><th>Judul Video</th><th class="r">Durasi</th><th class="r">Views</th><th class="r">RPM</th><th class="r">Pendapatan</th><th class="r">Biaya Produksi</th><th class="r">Surplus / Defisit</th><th>Status</th></tr></thead><tbody>${vr}</tbody></table>`:'<p class="pn">Belum ada video yang lengkap (H+7) pada bulan ini.</p>'}
+  ${wait.length?`<h2>5. Menunggu Data Lengkap</h2><p class="pn">${wait.length} video belum H+7 sehingga tidak dihitung dalam laporan ini:</p><ul class="pr">${wr}</ul>`:''}
+  <div class="sign"><div>Mengetahui,<br>${ROLE.manager}<br><br><br><br>(..............................)</div></div>`;
+  window.print();
+}
+
+/* ---------- target ---------- */
+function targetPage(){
+  const nf=(id,l,v,extra='')=>`<div><label for="${id}">${l}</label><input class="in" id="${id}" type="number" value="${v}" ${extra}></div>`;
+  return `<section class="card glass"><div class="head"><h2>Pengaturan Target</h2><span class="note">Khusus ${ROLE.manager}</span></div>
+    <form id="tgtForm" class="form" style="grid-template-columns:repeat(2,minmax(0,1fr))" novalidate>
+      ${nf('tBD','Biaya Produksi per Detik Durasi (Rp)',S.set.biayaDetik,'min="1"')}
+      <div><label for="tCat">Catatan Target</label><input class="in" id="tCat" type="text" value="${esc(S.set.catatan)}"></div>
+      ${nf('tRate','Target Tingkat Keberhasilan (%)',S.set.rateTarget,'min="1" max="100"')}
+      ${nf('tRev','Target Pendapatan per Bulan (Rp)',S.set.revTarget,'min="1"')}
+      ${nf('tGrow','Asumsi Pertumbuhan Target Tahunan (%)',S.set.growth,'min="0" max="200"')}
+      <div class="act"><button class="btn" type="submit">Simpan Target</button></div>
+    </form>${S.errs.length?`<div class="err" role="alert">${S.errs.join(' ')}</div>`:''}</section>
+  <section class="card glass"><div class="head"><h2>Aturan Sistem</h2></div><ul class="rules">
+    <li>Pendapatan = (Views ÷ 1.000) × RPM Channel</li>
+    <li>Biaya produksi = durasi video (detik) × ${rp(S.set.biayaDetik)}, tanpa biaya pokok. Semakin panjang video, semakin besar biayanya. Contoh video 12:00 (720 detik) = ${rp(costOf(720))}.</li>
+    <li>Watch target = views minimum agar pendapatan menutup biaya produksi = Biaya produksi ÷ RPM × 1.000. Berhasil jika pendapatan ≥ biaya produksi, Belum jika kurang.</li>
+    <li>Surplus = pendapatan melebihi biaya produksi; Defisit = pendapatan di bawah biaya produksi.</li>
+    <li>Video berhasil jika pendapatan ≥ biaya produksi.</li>
+    <li>Data baru dihitung di dashboard, evaluasi, dan laporan setelah H+${H_LENGKAP} dari tanggal upload. Sebelum itu statusnya Menunggu Data (H+7).</li>
+    <li>Data video yang sudah disimpan tidak dapat diubah atau dihapus. Perubahan rumus biaya hanya berlaku untuk data yang disimpan setelahnya.</li>
+    <li>Tingkat keberhasilan = video berhasil ÷ total video × 100%</li>
+    <li>Rekap triwulan dan tahunan dihitung kumulatif dari data video.</li>
+    <li>Target tingkat keberhasilan dan target pendapatan dipakai untuk garis target di grafik, panel Capaian Target, dan rekomendasi.</li></ul></section>`;
+}
+
+/* ---------- impor ---------- */
+function parsePer(s){
+  s=String(s).trim().toLowerCase();
+  let m=s.match(/^(\d{4})[-\/](\d{1,2})$/); if(m&&+m[2]>=1&&+m[2]<=12) return m[1]+'-'+String(+m[2]).padStart(2,'0');
+  m=s.match(/^(\d{1,2})[-\/](\d{4})$/); if(m&&+m[1]>=1&&+m[1]<=12) return m[2]+'-'+String(+m[1]).padStart(2,'0');
+  m=s.match(/^([a-z]+)\s+(\d{4})$/); if(m){ const i=MSHORT.findIndex(x=>m[1].startsWith(x.toLowerCase())); if(i>=0) return m[2]+'-'+String(i+1).padStart(2,'0'); }
+  return null;
+}
+const MON = {jan:1,feb:2,mar:3,apr:4,may:5,mei:5,jun:6,jul:7,aug:8,agu:8,agt:8,ags:8,sep:9,oct:10,okt:10,nov:11,dec:12,des:12};
+function ymd(y,mo,d){ const t=new Date(y,mo-1,d); if(!(y>1990)||t.getMonth()!==mo-1||t.getDate()!==d) return null; return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
+function parseDate(s){
+  s=String(s).trim().replace(/\s+/g,' '); let m;
+  if(m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)) return ymd(+m[1],+m[2],+m[3]);
+  if(m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/)) return ymd(+m[3],+m[2],+m[1]);
+  if(m=s.match(/^([A-Za-z]{3})[a-z]*\.? (\d{1,2}),? (\d{4})$/)) return MON[m[1].toLowerCase()]?ymd(+m[3],MON[m[1].toLowerCase()],+m[2]):null; // Nov 10, 2026
+  if(m=s.match(/^(\d{1,2}) ([A-Za-z]{3})[a-z]*\.?,? (\d{4})$/)) return MON[m[2].toLowerCase()]?ymd(+m[3],MON[m[2].toLowerCase()],+m[1]):null; // 10 Nov 2026
+  return null;
+}
+/* durasi: "12:30" atau "1:02:30"; angka polos = detik (format ekspor YouTube) */
+function parseDur(s){
+  s=String(s).trim(); const p=s.split(':');
+  if(p.length>1 && p.every(x=>/^\d+$/.test(x))) return p.reduce((a,x)=>a*60+ +x,0);
+  const n=numDec(s); return n>0?Math.round(n):NaN;
+}
+/* angka dengan desimal: mendukung 1234.56, 1,234.56, dan 1.234,56 */
+function numDec(s){
+  s=String(s).trim().replace(/[^\d.,-]/g,''); if(!s) return NaN;
+  const c=s.lastIndexOf(','), d=s.lastIndexOf('.');
+  if(c>-1&&d>-1) s = c>d ? s.replace(/\./g,'').replace(',','.') : s.replace(/,/g,'');
+  else if(c>-1) s = /^-?\d{1,3}(,\d{3})+$/.test(s) ? s.replace(/,/g,'') : s.replace(',','.');
+  else if((s.match(/\./g)||[]).length>1) s=s.replace(/\./g,'');
+  return +s;
+}
+const numOf = s => { const d=String(s).replace(/[^\d]/g,''); return d===''?NaN:+d; };
+function parseCSV(txt){
+  txt=txt.replace(/^﻿/,'');
+  const first=txt.split(/\r?\n/)[0]||'';
+  const sep=first.includes('\t')?'\t':(first.split(';').length>first.split(',').length?';':',');
+  const rows=[]; let row=[], cur='', q=false;
+  for(let i=0;i<txt.length;i++){
+    const ch=txt[i];
+    if(q){ if(ch==='"'){ if(txt[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=ch; }
+    else if(ch==='"') q=true;
+    else if(ch===sep){ row.push(cur); cur=''; }
+    else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&txt[i+1]==='\n') i++; row.push(cur); if(row.some(x=>x.trim())) rows.push(row.map(x=>x.trim())); row=[]; cur=''; }
+    else cur+=ch;
+  }
+  row.push(cur); if(row.some(x=>x.trim())) rows.push(row.map(x=>x.trim()));
+  return rows;
+}
+/* Kolom ekspor YouTube Studio (Analytics → Ekspor → CSV), bahasa Inggris atau Indonesia */
+const YT_COLS = {
+  vid:/^(content|konten|video ?id|id video)$/,
+  title:/^(video title|judul video|judul|title)$/,
+  date:/(publish|publikasi|dipublikasikan|tanggal|upload)/,
+  dur:/^(duration|durasi)/,
+  views:/^(views|penayangan|tayangan|x tayangan)$/,
+  wt:/(watch time|waktu tonton)/,
+  rpm:/^rpm/,
+  rev:/(estimated revenue|perkiraan pendapatan|estimasi pendapatan|pendapatan)/
+};
+function doImport(){
+  const rows=parseCSV(S.impTxt); let ok=0, dup=0; const bad=[];
+  if(!rows.length){ S.impMsg='Tidak ada data untuk diimpor.'; return; }
+  const head=rows[0].map(h=>h.toLowerCase().trim()), col={};
+  for(const k in YT_COLS){ const i=head.findIndex((h,j)=>YT_COLS[k].test(h) && !Object.values(col).includes(j)); if(i>-1) col[k]=i; }
+  const yt = col.vid!=null && col.views!=null && col.dur!=null;
+  const wtH = col.wt!=null && /(hour|jam)/.test(head[col.wt]);
+  const seen=new Set(S.videos.map(v=>v.vid));
+  rows.forEach((c,i)=>{
+    let date,vid,title,dur,views,wt,rpm;
+    if(yt){
+      if(i===0) return;
+      vid=c[col.vid]||''; if(/^(total|jumlah)$/i.test(vid)) return;
+      title=c[col.title]||''; date=parseDate(c[col.date]||''); dur=parseDur(c[col.dur]||'');
+      views=Math.round(numDec(c[col.views]||'')); const w=numDec(c[col.wt]||''); wt=Math.round(wtH?w*60:w);
+      rpm=col.rpm!=null?numDec(c[col.rpm]):NaN;
+      if(!(rpm>0) && col.rev!=null && views>0) rpm=numDec(c[col.rev])/views*1000;
+      rpm=Math.round(rpm);
+    } else {
+      if(i===0 && isNaN(numOf(c[4]||''))) return;
+      date=parseDate(c[0]||''); vid=c[1]||''; title=c[2]||''; dur=parseDur(c[3]||''); views=numOf(c[4]||''); wt=numOf(c[5]||''); rpm=numOf(c[6]||'');
+    }
+    if(!date||date>todayStr()||!/^[A-Za-z0-9_-]{6,20}$/.test(vid)||!title||!(dur>0)||!(views>0)||isNaN(wt)||!(rpm>0)){ bad.push(i+1); return; }
+    if(seen.has(vid)){ dup++; return; }
+    seen.add(vid);
+    S.videos.push({id:S.nextId++,date,per:date.slice(0,7),vid,title,dur,views,wt,rpm,cost:costOf(dur)}); ok++;
+  });
+  if(ok) save();
+  S.impMsg = `<b>${ok}</b> video diimpor${yt?' dari format ekspor YouTube Studio':''}.`+(dup?` ${dup} video dilewati karena Video ID sudah tersimpan.`:'')+(bad.length?` Baris dilewati karena tidak lengkap atau tidak valid: ${bad.slice(0,12).join(', ')}${bad.length>12?' dan lainnya':''}.`:'');
+  if(ok && !bad.length) S.impTxt='';
+}
+
+/* ---------- render ---------- */
+function render(){
+  const app=document.getElementById('app');
+  if(!S.user){ app.innerHTML=loginView(); return; }
+  ensureUi();
+  const allowed=navItems().map(n=>n[0]); if(!allowed.includes(S.page)) S.page='dashboard';
+  const body = {dashboard,input:inputPage,evaluasi,laporan,target:targetPage}[S.page]();
+  app.innerHTML=shell(body);
+}
+let tt;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true,3400); }
+function copyText(txt,okMsg){
+  const fb=()=>{ S.copy=txt; render(); const el=document.getElementById('copybox'); if(el){el.focus();el.select();} toast('Pilih teks lalu salin secara manual.'); };
+  try{ navigator.clipboard.writeText(txt).then(()=>toast(okMsg),fb); }catch(err){ fb(); }
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  const a=b.dataset.act;
+  if(a==='theme'){ cycleTheme(); return; }
+  if(a==='eye'){ S.ui.pw=!S.ui.pw; render(); return; }
+  if(a==='nav'){ S.page=b.dataset.p; S.errs=[]; S.copy=''; S.form={...DEF_FORM}; render(); window.scrollTo(0,0); return; }
+  if(a==='logout'){ S.user=null; S.page='dashboard'; S.loginErr=''; S.errs=[]; render(); return; }
+  if(a==='metric'){ S.ui.metric=b.dataset.m; render(); return; }
+  if(a==='reset'){ S.form={...DEF_FORM}; S.errs=[]; render(); return; }
+  if(a==='more'){ S.ui.show+=25; render(); return; }
+  if(a==='restore'){ seedVideos(); save(); render(); toast('Data contoh dipulihkan.'); return; }
+  if(a==='imp'){ S.ui.imp=!S.ui.imp; S.impMsg=''; render(); return; }
+  if(a==='doimp'){ doImport(); render(); return; }
+  if(a==='efilter'){ S.ui.ef=b.dataset.k; render(); return; }
+  if(a==='sort'){ const k=b.dataset.k; if(S.ui.es===k) S.ui.ed=S.ui.ed==='asc'?'desc':'asc'; else {S.ui.es=k; S.ui.ed='desc';} document.getElementById('evalTbl').innerHTML=evalTable(); return; }
+  if(a==='copy'){ copyText(reportText(),'Laporan disalin ke clipboard.'); return; }
+  if(a==='print'){ printReport(); return; }
+  if(a==='copytable'){
+    const {list}=evalData();
+    const txt=['Tanggal Upload\tVideo ID\tJudul Video\tDurasi\tViews\tWatch Time (menit)\tPendapatan\tBiaya Produksi\tSurplus/Defisit\tWatch Target (views)\tStatus',...list.map(({v,c})=>[v.date,v.vid||'',v.title||'',durTxt(v.dur),v.views,v.wt,c.rev,v.cost,c.gap,c.tViews,c.mature?(c.ok?'Berhasil':'Tidak Berhasil'):'Menunggu Data (H+7)'].join('\t'))].join('\n');
+    copyText(txt,'Tabel disalin. Tempel langsung ke Excel atau Sheets.');
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.f){ S.form[t.dataset.f]=t.value; const p=document.getElementById('prev'); if(p) p.innerHTML=previewHtml(); }
+  if(t.dataset.l){ S.loginF[t.dataset.l]=t.value; }
+  if(t.dataset.imp){ S.impTxt=t.value; }
+  if(t.dataset.q==='eq'){ S.ui.eq=t.value; document.getElementById('evalTbl').innerHTML=evalTable(); }
+  if(t.dataset.q==='iq'){ S.ui.iq=t.value; S.ui.show=15; document.getElementById('savedTbl').innerHTML=savedTable(); }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='impFile'&&t.files&&t.files[0]){ const fr=new FileReader(); fr.onload=()=>{ S.impTxt=String(fr.result); doImport(); render(); toast('Impor selesai.'); }; fr.readAsText(t.files[0]); return; }
+  const k=t.dataset.sel; if(!k) return;
+  if(k==='dType') switchType(t.value);
+  else if(k==='dPer') S.ui.dPer=t.value;
+  else if(k==='ePer') S.ui.ePer=t.value;
+  else if(k==='rYear'){ S.ui.rYear=t.value; S.ui.rMonth=''; }
+  else if(k==='rMonth') S.ui.rMonth=t.value;
+  S.copy=''; render();
+});
+document.addEventListener('submit',e=>{
+  e.preventDefault();
+  const id=e.target.id;
+  if(id==='loginForm'){
+    const f=S.loginF, u=USERS[f.u.trim().toLowerCase()];
+    if(!f.u.trim()||!f.p){ S.loginErr='Masukkan username dan password.'; render(); return; }
+    if(!u || u.pw!==f.p){ S.loginErr='Username atau password salah.'; render(); return; }
+    S.user=u.role; S.loginErr=''; S.loginF={u:'',p:''}; S.page='dashboard'; render(); return;
+  }
+  if(id==='vidForm'){
+    const f=S.form, er=[], dur=formDur(f);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) er.push('Tanggal upload');
+    else if(f.date>todayStr()) er.push('Tanggal upload tidak boleh setelah hari ini');
+    if(!/^[A-Za-z0-9_-]{6,20}$/.test(f.vid.trim())) er.push('Video ID (6–20 huruf, angka, - atau _)');
+    if(!f.title.trim()) er.push('Judul video');
+    if(!(dur>0) || (f.ds!==''&&!(+f.ds>=0&&+f.ds<60))) er.push('Durasi (detik 0–59)');
+    if(!(Number(f.views)>0)) er.push('Views');
+    if(f.wt===''||!(Number(f.wt)>=0)) er.push('Watch time');
+    if(!(Number(f.rpm)>0)) er.push('RPM channel');
+    S.errs=er;
+    if(er.length){ render(); return; }
+    const d=Math.round(dur);
+    const v={id:S.nextId++,date:f.date,per:f.date.slice(0,7),vid:f.vid.trim(),title:f.title.trim(),dur:d,views:Math.round(+f.views),wt:Math.round(+f.wt),rpm:+f.rpm,cost:costOf(d)};
+    S.videos.push(v);
+    save(); S.form={...DEF_FORM}; render();
+    const c=calc(v); toast(`Video ${tgl(v.date)} tersimpan: ${c.mature?(c.ok?'Berhasil':'Tidak Berhasil'):'menunggu data lengkap (H+7)'}, pendapatan ${rp(c.rev)}.`); return;
+  }
+  if(id==='tgtForm'){
+    const g=i=>Number(document.getElementById(i).value), er=[];
+    if(!(g('tBD')>0)) er.push('Biaya per detik harus lebih dari 0.');
+    if(!(g('tRate')>0&&g('tRate')<=100)) er.push('Target tingkat keberhasilan harus antara 1 dan 100.');
+    if(!(g('tRev')>0)) er.push('Target pendapatan harus lebih dari 0.');
+    if(!(g('tGrow')>=0)) er.push('Pertumbuhan tidak boleh negatif.');
+    S.errs=er; if(er.length){ render(); return; }
+    S.set={biayaDetik:Math.round(g('tBD')),catatan:document.getElementById('tCat').value.trim(),rateTarget:g('tRate'),revTarget:Math.round(g('tRev')),growth:g('tGrow')};
+    save(); render(); toast('Target disimpan dan dipakai pada evaluasi berikutnya.');
+  }
+});
+
+load(); render();
+</script>
